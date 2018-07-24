@@ -249,13 +249,30 @@ paket-files/
 # FAKE - F# Make
 .fake/
 
-# JetBrains Rider
-.idea/
-*.sln.iml
-
 # CodeRush
 .cr/
 
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+#
+# CUSTOM
+#
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Others
+.DS_STORE
+.idea.Math
+.idea
+.vscode
+yarn.lock
+.yarn-integrity
+appsettings.Development.json
+appsettings.Staging.json
+appsettings.Production.json
+src/keys/*.xml
+src/keys
