@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using MathSite.Api.Server.Infrastructure.Configuration;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,50 +15,57 @@ namespace MathSite.Api.Server
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+
+        /// <summary>
+        ///     Конфигурация сервисов для разработки.
+        /// </summary>
+        /// <param name="services"></param>
+        public void ConfigureDevelopmentServices(IServiceCollection services)
         {
-            services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            ConfigureServices(services, true);
+        }
+
+        /// <summary>
+        ///     Конфигурация сервисов для боевого сайта.
+        /// </summary>
+        /// <param name="services"></param>
+        public void ConfigureProductionServices(IServiceCollection services)
+        {
+            ConfigureServices(services, false);
+        }
+
+        /// <summary>
+        ///     Конфигурация сервисов для тестирования.
+        /// </summary>
+        /// <param name="services"></param>
+        public void ConfigureStagingServices(IServiceCollection services)
+        {
+            ConfigureServices(services, false);
+        }
+
+        /// <summary>
+        ///     Конфигурирование DI и настройка сервисов.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="isDevelopment"></param>
+        private void ConfigureServices(IServiceCollection services, bool isDevelopment)
+        {
+            services.ConfigureMvc();
             services.AddApiVersioning();
-            services.AddRouting(options => { options.LowercaseUrls = true; });
+            services.ConfigureRouting();
+            services.ConfigureDb(Configuration.GetConnectionString("Math"), isDevelopment);
+            services.ConfigureDi(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            });
-
             if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                app.UseDevelopmentConfig();
 
-                app.UseCors(builder =>
-                {
-                    builder.AllowAnyOrigin();
-                    builder.AllowAnyHeader();
-                    builder.AllowAnyMethod();
-                    builder.AllowCredentials();
-                });
-            }
-
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "areaRoute",
-                    template: "{area:exists}/{controller=Home}/{action=Index}"
-                );
-
-                routes.MapRoute(
-                    name: "default",
-                    template: "/",
-                    defaults: new {controller = "Home", action = "Index"}
-                );
-            });
+            app.UseForwarding();
+            app.UseAuthentication();
+            app.UseMathRouting();
         }
     }
 }

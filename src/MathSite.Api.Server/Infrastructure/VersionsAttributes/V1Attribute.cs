@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MathSite.Api.Server.VersionsAttributes
+namespace MathSite.Api.Server.Infrastructure.VersionsAttributes
 {
     /// <summary>
     /// First API version for app.
