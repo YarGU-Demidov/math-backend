@@ -1,4 +1,5 @@
-﻿using MathSite.Api.Common;
+﻿using AutoMapper;
+using MathSite.Api.Common;
 using MathSite.Api.Common.ActionResults;
 using MathSite.Api.Common.FileFormats;
 using MathSite.Api.Common.FileStorage;
@@ -72,6 +73,8 @@ namespace MathSite.Api.Server.Infrastructure.Configuration
             {
                 options.MultipartBodyLengthLimit = long.MaxValue;
             });
+
+            services.AddAutoMapper();
 
             return services;
         }

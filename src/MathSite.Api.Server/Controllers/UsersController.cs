@@ -1,146 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using MathSite.Api.Common.Attributes;
 using MathSite.Api.Common.Crypto;
-using MathSite.Api.Common.Extensions;
-using MathSite.Api.Common.Specifications;
-using MathSite.Api.Db.DataSeeding.StaticData;
+using MathSite.Api.Db;
+using MathSite.Api.Dto;
 using MathSite.Api.Entities;
-using MathSite.Api.Repositories;
-using MathSite.Api.Repositories.Core;
+using MathSite.Api.Internal;
 using MathSite.Api.Server.Infrastructure;
 using MathSite.Api.Server.Infrastructure.VersionsAttributes;
-using MathSite.Api.Specifications.Users;
+using MathSite.Api.Services.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MathSite.Api.Server.Controllers
 {
     [V1]
-    [DefaultApiRoute]
+    [DefaultApiRoute(ServiceNames.Users)]
     [ApiController]
-    public class UsersController : ApiControllerBase<IUsersRepository, User>
+    public class UsersController : CrudPageableApiControllerBase<UserDto, User>
     {
-        private readonly IUserValidationFacade _validationFacade;
         private readonly IPasswordsManager _passwordsManager;
+
         public UsersController(
-            IRepositoryManager repositoryManager,
-            IUserValidationFacade validationFacade,
-            IPasswordsManager passwordsManager
-        ) : base(repositoryManager)
+            MathSiteDbContext context,
+            IPasswordsManager passwordsManager,
+            MathServices services, 
+            IMapper mapper
+        ) : base(context, services, mapper)
         {
-            _validationFacade = validationFacade;
             _passwordsManager = passwordsManager;
         }
 
-        [HttpGet("get-count")]
-        public async Task<ActionResult<int>> GetCountAsync()
+        protected override string AreaName { get; } = "Users";
+
+        [HttpGet(MethodNames.Users.GetAll)]
+        public async Task<IEnumerable<UserDto>> GetAllAsync()
         {
-            var requirements = new AnySpecification<User>();
-            return await GetCountAsync(requirements);
+            return await Repository.Select(user => Mapper.Map<UserDto>(user)).ToArrayAsync();
         }
 
-        // TODO: FIXME: Extract to classes or smth else
-        public async Task<ActionResult<int>> GetUsersPagesCountAsync(int perPage)
+        [HttpGet(MethodNames.Users.GetByLogin)]
+        public async Task<UserDto> GetByLogin(string login)
         {
-            var requirements = new AnySpecification<User>();
-            var usersCount = await GetCountAsync(requirements);
-
-            return GetPagesCount(perPage, usersCount);
+            var user = await Repository.FirstOrDefaultAsync(u => login == u.Login);
+            return Mapper.Map<UserDto>(user);
         }
 
-        public async Task<ActionResult<IEnumerable<User>>> GetAllUsersAsync()
+        protected override async Task<User> ViewModelToEntityAsync(UserDto viewModel, ActionType actionType)
         {
-            return await Repository.WithPerson().GetAllListAsync();
-        }
-
-        public async Task<IEnumerable<User>> GetUsersAsync(int page, int perPage)
-        {
-            return await GetItemsForPageAsync(repository => repository.WithPerson(), page, perPage);
-        }
-
-        public async Task<User> GetUserAsync(string possibleUserId)
-        {
-            if (possibleUserId.IsNullOrWhiteSpace())
-                return null;
-
-            var userIdGuid = Guid.Parse(possibleUserId);
-
-            return await GetUserAsync(userIdGuid);
-        }
-
-        public async Task<User> GetUserAsync(Guid possibleUserId)
-        {
-            if (possibleUserId == default)
-                return null;
-
-            return await Repository
-                .WithPerson()
-                .FirstOrDefaultAsync(possibleUserId);
-        }
-
-        public async Task<bool> DoesUserExistsAsync(Guid userId)
-        {
-            return await Repository.FirstOrDefaultAsync(userId) != null;
-        }
-        public async Task<bool> DoesUserExistsAsync(string login)
-        {
-            var requirements = new HasLoginSpecification(login);
-
-            return await RepositoryManager.UsersRepository.FirstOrDefaultAsync(requirements) != null;
-        }
-
-        public async Task CreateUserAsync(Guid currentUser, Guid personId, string login, string password, Guid groupId)
-        {
-            var canCreate = await _validationFacade.UserHasRightAsync(currentUser, RightAliases.AdminAccess);
-
-            if (!canCreate)
-                throw new AccessViolationException();
-
-            var passHash = _passwordsManager.CreatePassword(login, password);
-
-            var user = new User(login, passHash, groupId) {PersonId = personId};
-
-            await Repository.InsertAsync(user);
-        }
-        
-        public async Task UpdateUserAsync(Guid currentUser, Guid id, Guid? personId = null, Guid? groupId = null, string newPassword = null)
-        {
-            var canUpdate = await _validationFacade.UserHasRightAsync(currentUser, RightAliases.AdminAccess);
-
-            if (!canUpdate)
-                throw new AccessViolationException();
-
-            var user = await GetUserAsync(id);
-
-            if (newPassword.IsNotNullOrWhiteSpace())
+            User user;
+            if (actionType == ActionType.Create)
             {
-                var passHash = _passwordsManager.CreatePassword(user.Login, newPassword);
-                user.PasswordHash = passHash;
+                user = new User();
+                Mapper.Map(viewModel, user);
             }
-            
-            if (groupId.HasValue)
-                user.GroupId = groupId.Value;
+            else
+            {
+                user = await Repository.FirstOrDefaultAsync(u => u.Id == viewModel.Id);
+                
+                var userLogin = user.Login;
+                Mapper.Map(viewModel, user);
+                user.Login = userLogin;
+            }
 
-            if (personId.HasValue)
-                user.PersonId = personId.Value;
+            user.PasswordHash = _passwordsManager.CreatePassword(viewModel.Login, viewModel.Password);
 
-            await Repository.UpdateAsync(user);
-        }
-
-        public async Task RemoveUser(Guid currentUser, Guid id)
-        {
-            var canUpdate = await _validationFacade.UserHasRightAsync(currentUser, RightAliases.AdminAccess);
-
-            if (!canUpdate)
-                throw new AccessViolationException();
-
-            await Repository.DeleteAsync(id);
-        }
-
-        public async Task<User> GetUserByLoginAsync(string login)
-        {
-            return await Repository.WithPerson().FirstOrDefaultAsync(new HasLoginSpecification(login));
+            return user;
         }
     }
 }

@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace MathSite.Api.Server.Infrastructure.VersionsAttributes
 {
     /// <summary>
-    /// First API version for app.
+    ///     First API version for app.
     /// </summary>
     /// <inheritdoc />
-    [AttributeUsage( AttributeTargets.Class, AllowMultiple = false, Inherited = false )]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class V1Attribute : ApiVersionAttribute
     {
         public V1Attribute() : base(new ApiVersion(1, 0))

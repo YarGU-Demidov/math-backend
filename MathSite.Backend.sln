@@ -9,15 +9,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{2EE40727
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Server", "src\MathSite.Api.Server\MathSite.Api.Server.csproj", "{0378CB0F-2817-4707-8249-12D3E296506E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Dto", "src\MathSite.Api.Dto\MathSite.Api.Dto.csproj", "{71448BC5-058D-4097-A3C3-50C5A2665B2F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Common", "src\MathSite.Api.Common\MathSite.Api.Common.csproj", "{28C06C1B-2BEE-4976-93C3-53D78F8FE650}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathSite.Api.Entities", "src\MathSite.Api.Entities\MathSite.Api.Entities.csproj", "{B1F15B8B-EF5B-4D0F-8BE2-2685628AD09F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Entities", "src\MathSite.Api.Entities\MathSite.Api.Entities.csproj", "{B1F15B8B-EF5B-4D0F-8BE2-2685628AD09F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathSite.Api.Db", "src\MathSite.Api.Db\MathSite.Api.Db.csproj", "{A0AE5512-FFDB-4BCF-BABE-1214C9D870CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Db", "src\MathSite.Api.Db\MathSite.Api.Db.csproj", "{A0AE5512-FFDB-4BCF-BABE-1214C9D870CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathSite.Api.Specifications", "src\MathSite.Api.Specifications\MathSite.Api.Specifications.csproj", "{5EA70D48-B6EA-42E0-9DF0-B0A5FD48D65C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Specifications", "src\MathSite.Api.Specifications\MathSite.Api.Specifications.csproj", "{5EA70D48-B6EA-42E0-9DF0-B0A5FD48D65C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Repositories", "src\MathSite.Api.Repositories\MathSite.Api.Repositories.csproj", "{CE05444D-498B-48B2-BB88-3E7E5C27BB7F}"
 EndProject
@@ -31,10 +29,6 @@ Global
 		{0378CB0F-2817-4707-8249-12D3E296506E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0378CB0F-2817-4707-8249-12D3E296506E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0378CB0F-2817-4707-8249-12D3E296506E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{71448BC5-058D-4097-A3C3-50C5A2665B2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{71448BC5-058D-4097-A3C3-50C5A2665B2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{71448BC5-058D-4097-A3C3-50C5A2665B2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{71448BC5-058D-4097-A3C3-50C5A2665B2F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{28C06C1B-2BEE-4976-93C3-53D78F8FE650}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{28C06C1B-2BEE-4976-93C3-53D78F8FE650}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28C06C1B-2BEE-4976-93C3-53D78F8FE650}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -61,7 +55,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0378CB0F-2817-4707-8249-12D3E296506E} = {9B5BC935-511B-47CC-8ADE-70DD7B508890}
-		{71448BC5-058D-4097-A3C3-50C5A2665B2F} = {9B5BC935-511B-47CC-8ADE-70DD7B508890}
 		{28C06C1B-2BEE-4976-93C3-53D78F8FE650} = {9B5BC935-511B-47CC-8ADE-70DD7B508890}
 		{B1F15B8B-EF5B-4D0F-8BE2-2685628AD09F} = {9B5BC935-511B-47CC-8ADE-70DD7B508890}
 		{A0AE5512-FFDB-4BCF-BABE-1214C9D870CE} = {9B5BC935-511B-47CC-8ADE-70DD7B508890}

@@ -24,7 +24,7 @@ namespace MathSite.Api.Common.Attributes
         ///     option).
         /// </param>
         /// <param name="rewrite">Rewrite controller name.</param>
-        public DefaultApiRouteAttribute(string additionalPath, bool rewrite = false)
+        public DefaultApiRouteAttribute(string additionalPath, bool rewrite = true)
             : base(rewrite ? additionalPath : $"[controller]/{additionalPath}")
         {
         }
