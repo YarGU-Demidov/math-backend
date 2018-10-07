@@ -42,6 +42,14 @@ namespace MathSite.Api.Db.DataSeeding.Seeders
                 true
             );
 
+            var guestsGroup = CreateGroup(
+                "Guests",
+                "Site guests",
+                GroupAliases.Guest,
+                Context.GroupTypes.First(groupType => groupType.Alias == GroupTypeAliases.User),
+                true
+            );
+
             var studentsGroup = CreateGroup(
                 "Students",
                 "Students",
@@ -54,7 +62,8 @@ namespace MathSite.Api.Db.DataSeeding.Seeders
                 employeesGroup,
                 studentsGroup,
                 usersGroup,
-                administratorsGroup
+                administratorsGroup,
+                guestsGroup
             };
 
             Context.Groups.AddRange(groups);

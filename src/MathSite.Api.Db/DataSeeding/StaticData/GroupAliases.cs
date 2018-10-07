@@ -3,6 +3,7 @@
     public static class GroupAliases
     {
         public const string Admin = "admin";
+        public const string Guest = "guest";
         public const string User = "user";
 
         // Деканат

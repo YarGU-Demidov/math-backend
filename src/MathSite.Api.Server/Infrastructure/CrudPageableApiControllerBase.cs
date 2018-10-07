@@ -13,15 +13,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MathSite.Api.Server.Infrastructure
 {
-    public enum ActionType
-    {
-        Update,
-        Create
-    }
-
     public abstract class CrudPageableApiControllerBase<TViewModel, TEntity> : CrudPageableApiControllerBase<TViewModel, TEntity, Guid>
         where TViewModel : BaseEntity
-        where TEntity : class, IEntity<Guid>
+        where TEntity : class, IEntity
     {
         protected CrudPageableApiControllerBase(MathSiteDbContext context, MathServices services, IMapper mapper) : base(context, services, mapper)
         {
@@ -38,83 +32,59 @@ namespace MathSite.Api.Server.Infrastructure
         where TEntity : class, IEntity<TPrimaryKey>
         where TPrimaryKey : IComparable<TPrimaryKey>
     {
-        protected MathServices Services { get; }
         protected IMapper Mapper { get; }
 
-        protected abstract string AreaName { get; }
-
-        protected CrudPageableApiControllerBase(MathSiteDbContext context, MathServices services, IMapper mapper) : base(context)
+        protected CrudPageableApiControllerBase(MathSiteDbContext context, MathServices services, IMapper mapper) : base(context, services)
         {
-            Services = services;
             Mapper = mapper;
         }
 
         [HttpPost(MethodNames.Global.GetOne)]
-        public virtual async Task<ApiResponse> GetById(TPrimaryKey id)
-        {
-            try
+        public virtual async Task<ApiResponse<TViewModel>> GetById(TPrimaryKey id)
+        {   
+            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Global.GetOne, async () =>
             {
-                await MethodAccessCheck("Read");
                 var entity = await GetEntityByIdAsync(id);
                 var model = Mapper.Map<TViewModel>(entity);
-                return new DataApiResponse<TViewModel>(model);
-            }
-            catch (Exception e)
-            {
-                return new ErrorApiResponse(e.Message);
-            }
+                return model;
+            });
         }
 
         [HttpPost(MethodNames.Global.Create)]
-        public virtual async Task<ApiResponse> CreateAsync(TViewModel viewModel)
+        public virtual async Task<ApiResponse<TPrimaryKey>> CreateAsync(TViewModel viewModel)
         {
-            try
+            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Global.Create, async () =>
             {
-                await MethodAccessCheck("Create");
                 var entity = await ViewModelToEntityAsync(viewModel, ActionType.Create);
-                var a = await Repository.AddAsync(entity);
+                var entry = await Repository.AddAsync(entity);
                 await Context.SaveChangesAsync();
 
-                return new DataApiResponse<TPrimaryKey>(data: a.Entity.Id);
-            }
-            catch (Exception e)
-            {
-                return new ErrorApiResponse(e.Message);
-            }
+                return entry.Entity.Id;
+            });
         }
 
         [HttpPost(MethodNames.Global.Update)]
-        public virtual async Task<ApiResponse> UpdateAsync(TViewModel viewModel)
+        public virtual async Task<ApiResponse<TPrimaryKey>> UpdateAsync(TViewModel viewModel)
         {
-            try
+            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Global.Update ,async () =>
             {
-                await MethodAccessCheck("Update");
                 var entity = await ViewModelToEntityAsync(viewModel, ActionType.Update);
                 await Task.FromResult(Repository.Update(entity));
                 await Context.SaveChangesAsync();
-                return new DataApiResponse<TPrimaryKey>(data: entity.Id);
-            }
-            catch (Exception e)
-            {
-                return new ErrorApiResponse(e.Message);
-            }
+                return entity.Id;
+            });
         }
 
         [HttpPost(MethodNames.Global.Delete)]
         public virtual async Task<ApiResponse> DeleteAsync(TPrimaryKey id)
         {
-            try
+            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Global.Delete, async () =>
             {
-                await MethodAccessCheck("Delete");
                 var entity = await GetEntityByIdAsync(id);
                 Repository.Remove(entity);
                 await Context.SaveChangesAsync();
-                return new VoidApiResponse();
-            }
-            catch (Exception e)
-            {
-                return new ErrorApiResponse(e.Message);
-            }
+                return new VoidApiResponse<string>();
+            });
         }
 
         private async Task<TEntity> GetEntityByIdAsync(TPrimaryKey id)
@@ -122,7 +92,7 @@ namespace MathSite.Api.Server.Infrastructure
             var item = await Repository.FirstOrDefaultAsync(GetIdComparer(id));
 
             if (item == null)
-                throw new EntityNotFoundException(ErrorsDescriptions.EntityNotFound);
+                throw new EntityNotFoundException(ExceptionsDescriptions.EntityNotFound);
 
             return item;
         }
@@ -143,15 +113,5 @@ namespace MathSite.Api.Server.Infrastructure
         /// <param name="compareToKey">Ключ, с которым сравниваем</param>
         /// <returns>Выражение для EntityFramework, сравнивающее 2 Id-шника</returns>
         protected abstract Expression<Func<TEntity, bool>> GetIdComparer(TPrimaryKey compareToKey);
-
-        protected async Task MethodAccessCheck(string methodName)
-        {
-            var accessAllowed = await Services.Users.HasCurrentUserRightAsync($"{AreaName}.{methodName}");
-
-            if (accessAllowed)
-                return;
-
-            throw new MethodAccessException("You've got no access to this method.");
-        }
     }
 }

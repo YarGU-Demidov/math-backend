@@ -6,6 +6,7 @@ using MathSite.Api.Common.Extensions;
 using MathSite.Api.Core;
 using MathSite.Api.Db;
 using MathSite.Api.Internal;
+using MathSite.Api.Services.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +15,7 @@ namespace MathSite.Api.Server.Infrastructure
     public abstract class PageableApiControllerBase<TEntity> : PageableApiControllerBase<TEntity, Guid>
         where TEntity : class, IEntity<Guid>
     {
-        protected PageableApiControllerBase(MathSiteDbContext context) : base(context)
+        protected PageableApiControllerBase(MathSiteDbContext context, MathServices services) : base(context, services)
         {
         }
     }
@@ -23,28 +24,22 @@ namespace MathSite.Api.Server.Infrastructure
         where TEntity : class, IEntity<TPrimaryKey>
     {
 
-        protected PageableApiControllerBase(MathSiteDbContext context) : base(context)
+        protected PageableApiControllerBase(MathSiteDbContext context, MathServices services) : base(context, services)
         {
         }
 
         [HttpPost(MethodNames.Global.GetPaged)]
-        public virtual async Task<ApiResponse> GetAllPagedAsync(int page, int perPage)
+        public virtual async Task<ApiResponse<IEnumerable<TEntity>>> GetAllPagedAsync(int page, int perPage)
         {
-            try
+            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Global.GetPaged, async () =>
             {
                 page = page >= 1 ? page : 1;
                 perPage = perPage > 0 ? perPage : 1;
 
                 var skip = (page - 1) * perPage;
 
-                return new DataApiResponse<IEnumerable<TEntity>>(
-                    data: await Repository.PageBy(perPage, skip).ToArrayAsync()
-                );
-            }
-            catch (Exception e)
-            {
-                return new ErrorApiResponse(e.Message);
-            }
+                return (IEnumerable<TEntity>) await Repository.PageBy(perPage, skip).ToArrayAsync();
+            });
         }
     }
 }
