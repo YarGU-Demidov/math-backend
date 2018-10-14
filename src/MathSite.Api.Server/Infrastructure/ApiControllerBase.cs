@@ -1,34 +1,20 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MathSite.Api.Common.Entities;
 using MathSite.Api.Core;
 using MathSite.Api.Db;
 using MathSite.Api.Services.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace MathSite.Api.Server.Infrastructure
 {
-    public abstract class ApiControllerBase<TEntity> : ApiControllerBase<TEntity, Guid>
-        where TEntity : class, IEntity<Guid>
+    public abstract class ApiControllerBase : ControllerBase
     {
-        public ApiControllerBase(MathSiteDbContext context, MathServices services)
-            : base(context, services)
-        {
-        }
-    }
-
-    public abstract class ApiControllerBase<TEntity, TPrimaryKey> : ControllerBase
-        where TEntity : class, IEntity<TPrimaryKey>
-    {
-        public ApiControllerBase(MathSiteDbContext context, MathServices services)
+        protected ApiControllerBase(MathSiteDbContext context, MathServices services)
         {
             Context = context;
             Services = services;
-            Repository = context.Set<TEntity>();
         }
 
-        protected DbSet<TEntity> Repository { get; }
         protected MathSiteDbContext Context { get; }
         protected MathServices Services { get; }
 

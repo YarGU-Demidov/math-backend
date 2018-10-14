@@ -31,14 +31,14 @@ namespace MathSite.Api.Server.Controllers
         public UsersController(
             MathSiteDbContext context,
             IPasswordsManager passwordsManager,
-            MathServices services, 
+            MathServices services,
             IMapper mapper
         ) : base(context, services, mapper)
         {
             _passwordsManager = passwordsManager;
         }
 
-        protected override string AreaName { get; } = "Users";
+        protected override string AreaName { get; } = ServiceNames.Users;
 
         [HttpGet(MethodNames.Users.GetAll)]
         public async Task<ApiResponse<IEnumerable<UserDto>>> GetAllAsync()
@@ -94,7 +94,9 @@ namespace MathSite.Api.Server.Controllers
 
                 if (isAdmin)
                 {
-                    hasRight = await Repository.AnyAsync(user => user.Id == userId && user.UserRights.All(right => right.Allowed));
+                    hasRight = await Repository.AnyAsync(
+                        user => user.Id == userId && user.UserRights.Where(right => right.Right.Alias == rightAlias).All(right => right.Allowed)
+                    );
                 }
                 else if (isGuest)
                 {
@@ -104,18 +106,16 @@ namespace MathSite.Api.Server.Controllers
                     if (guestsGroup.IsNull())
                         throw new MissingMemberException(ExceptionsDescriptions.GuestsGroupNotFound);
 
-                    hasRight = await Services.Groups.HasRightAsync(rightAlias);
+                    hasRight = await Services.Groups.HasRightAsync(guestsGroup.Id, rightAlias);
                 }
                 else
                 {
-                    var count = await Repository.Where(user => user.Id == userId)
-                        .CountAsync(user =>
+                    hasRight = await Repository.Where(user => user.Id == userId)
+                        .AnyAsync(user =>
                             user.UserRights.Any(
-                                right => right.Right.Alias == rightAlias && right.Allowed
+                                right => right.Allowed && right.Right.Alias == rightAlias
                             )
                         );
-
-                    hasRight = count > 0;
                 }
                 
                 return hasRight;
@@ -127,41 +127,13 @@ namespace MathSite.Api.Server.Controllers
         {
             return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Users.HasCurrentUserRight, async () =>
             {
-                var userId = GetCurrentUserId();
+                var userId = await Services.Auth.GetCurrentUserIdAsync();
 
                 var allowed = await Services.Users.HasRightAsync(userId, rightAlias);
                 return allowed;
             });
         }
-
-        private Guid GetCurrentUserId()
-        {
-            var user = HttpContext.User;
-            Guid id;
-
-            if (user?.Identity == null || !user.Identity.IsAuthenticated)
-            {
-                id = Guid.Empty;
-            }
-            else
-            {
-                const string claimType = "UserId";
-
-                if (user.HasClaim(claim => claim.Type == claimType && claim.Value.IsNotNullOrWhiteSpace()))
-                {
-                    var claim = user.Claims.First(c => c.Type == claimType && c.Value.IsNotNullOrWhiteSpace());
-                        
-                    id = Guid.Parse(claim.Value);
-                }
-                else
-                {
-                    id = Guid.Empty;
-                }
-            }
-
-            return id;
-        }
-
+        
         protected override async Task<User> ViewModelToEntityAsync(UserDto viewModel, ActionType actionType)
         {
             User user;

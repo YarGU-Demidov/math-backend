@@ -2,15 +2,12 @@
 
 namespace MathSite.Api.Common.Entities
 {
-    public interface IEntityWithNameAndAlias : IEntityWithNameAndAlias<Guid> { }
-
-    public interface IEntityWithNameAndAlias<TPrimaryKey> : IEntityWithName<TPrimaryKey>, IEntityWithAlias<TPrimaryKey> { }
 
     [Serializable]
-    public class EntityWithNameAndAlias : EntityWithNameAndAlias<Guid>, IEntityWithNameAndAlias { }
+    public class EntityWithNameAndAlias : EntityWithNameAndAlias<Guid> { }
 
     [Serializable]
-    public class EntityWithNameAndAlias<TPrimaryKey> : Entity<TPrimaryKey>, IEntityWithNameAndAlias<TPrimaryKey>
+    public class EntityWithNameAndAlias<TPrimaryKey> : EntityWithAlias<TPrimaryKey>
     {
         public string Name { get; set; }
         public string Alias { get; set; }

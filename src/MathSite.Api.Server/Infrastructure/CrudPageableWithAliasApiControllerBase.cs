@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using MathSite.Api.Common.Entities;
@@ -12,9 +13,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MathSite.Api.Server.Infrastructure
 {
+    public abstract class CrudPageableWithAliasApiControllerBase<TViewModel, TEntity> : CrudPageableWithAliasApiControllerBase<TViewModel, TEntity, Guid>
+        where TViewModel : BaseEntityWithAlias
+        where TEntity : EntityWithAlias<Guid>
+    {
+        protected CrudPageableWithAliasApiControllerBase(MathSiteDbContext context, MathServices services, IMapper mapper) 
+            : base(context, services, mapper)
+        {
+        }
+
+        protected override Expression<Func<TEntity, bool>> GetIdComparer(Guid compareToKey)
+        {
+            return entity => entity.Id == compareToKey;
+        }
+    }
+
     public abstract class CrudPageableWithAliasApiControllerBase<TViewModel, TEntity, TPrimaryKey> : CrudPageableApiControllerBase<TViewModel, TEntity, TPrimaryKey>
         where TViewModel : BaseEntityWithAlias<TPrimaryKey>
-        where TEntity : class, IEntityWithAlias<TPrimaryKey>
+        where TEntity : EntityWithAlias<TPrimaryKey>
         where TPrimaryKey : IComparable<TPrimaryKey>
     {
         protected CrudPageableWithAliasApiControllerBase(

@@ -14,8 +14,8 @@ using Microsoft.EntityFrameworkCore;
 namespace MathSite.Api.Server.Infrastructure
 {
     public abstract class CrudPageableApiControllerBase<TViewModel, TEntity> : CrudPageableApiControllerBase<TViewModel, TEntity, Guid>
-        where TViewModel : BaseEntity
-        where TEntity : class, IEntity
+        where TViewModel : BaseEntity<Guid>
+        where TEntity : class, IEntity<Guid>
     {
         protected CrudPageableApiControllerBase(MathSiteDbContext context, MathServices services, IMapper mapper) : base(context, services, mapper)
         {

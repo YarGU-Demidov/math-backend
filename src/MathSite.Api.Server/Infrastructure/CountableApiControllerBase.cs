@@ -18,7 +18,7 @@ namespace MathSite.Api.Server.Infrastructure
         }
     }
 
-    public abstract class CountableApiControllerBase<TEntity, TPrimaryKey> : ApiControllerBase<TEntity, TPrimaryKey>
+    public abstract class CountableApiControllerBase<TEntity, TPrimaryKey> : EntityApiControllerBase<TEntity, TPrimaryKey>
         where TEntity : class, IEntity<TPrimaryKey>
     {
 

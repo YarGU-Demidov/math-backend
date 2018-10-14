@@ -5,7 +5,7 @@ using MathSite.Api.Common.Specifications;
 
 namespace MathSite.Api.Specifications
 {
-    public class SameAliasSpecification<TEntity> : SameAliasSpecification<TEntity, Guid> where TEntity : IEntityWithAlias<Guid>
+    public class SameAliasSpecification<TEntity> : SameAliasSpecification<TEntity, Guid> where TEntity : EntityWithAlias<Guid>
     {
         public SameAliasSpecification(string alias) : base(alias)
         {
@@ -13,7 +13,7 @@ namespace MathSite.Api.Specifications
     }
 
     public class SameAliasSpecification<TEntity, TKey> : Specification<TEntity>
-        where TEntity : IEntityWithAlias<TKey>
+        where TEntity : EntityWithAlias<TKey>
     {
         private readonly string _alias;
 
