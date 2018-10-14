@@ -28,10 +28,12 @@ namespace MathSite.Api.Server.Controllers
         {
             return await ExecuteSafely(async () =>
             {
-                return false;
+                throw new NotImplementedException();
+                return true;
             });
         }
 
         protected override string AreaName { get; } = ServiceNames.Groups;
+        protected override bool GetAliasWithAccessCheck { get; } = false;
     }
 }

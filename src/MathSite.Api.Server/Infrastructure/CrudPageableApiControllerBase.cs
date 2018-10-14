@@ -39,7 +39,7 @@ namespace MathSite.Api.Server.Infrastructure
             Mapper = mapper;
         }
 
-        [HttpPost(MethodNames.Global.GetOne)]
+        [HttpGet(MethodNames.Global.GetOne)]
         public virtual async Task<ApiResponse<TViewModel>> GetById(TPrimaryKey id)
         {   
             return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Global.GetOne, async () =>

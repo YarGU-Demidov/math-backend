@@ -61,7 +61,7 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
-        [HttpGet(MethodNames.Users.GetByLoginAndPassword)]
+        [HttpPost(MethodNames.Users.GetByLoginAndPassword)]
         public async Task<ApiResponse<UserDto>> GetByLoginAndPasswordAsync(string login, string password)
         {
             return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Users.GetByLoginAndPassword, async () =>
@@ -80,7 +80,7 @@ namespace MathSite.Api.Server.Controllers
         [HttpGet(MethodNames.Users.HasRight)]
         public async Task<ApiResponse<bool>> HasRightAsync(Guid userId, string rightAlias)
         {
-            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Users.HasRight, async () =>
+            return await ExecuteSafely(async () =>
             {
                 var isGuest = userId == Guid.Empty || await Repository.CountAsync(user => user.Id == userId) == 0;
                 
@@ -125,12 +125,11 @@ namespace MathSite.Api.Server.Controllers
         [HttpGet(MethodNames.Users.HasCurrentUserRight)]
         public async Task<ApiResponse<bool>> HasCurrentUserRightAsync(string rightAlias)
         {
-            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Users.HasCurrentUserRight, async () =>
+            return await ExecuteSafely(async () =>
             {
                 var userId = await Services.Auth.GetCurrentUserIdAsync();
 
-                var allowed = await Services.Users.HasRightAsync(userId, rightAlias);
-                return allowed;
+                return await Services.Users.HasRightAsync(userId, rightAlias);
             });
         }
         

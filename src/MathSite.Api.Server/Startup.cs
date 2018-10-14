@@ -55,6 +55,7 @@ namespace MathSite.Api.Server
             services.ConfigureRouting();
             services.ConfigureDb(Configuration.GetConnectionString("Math"), isDevelopment);
             services.ConfigureDi(Configuration);
+            services.ConfigureAuth(Configuration, isDevelopment);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

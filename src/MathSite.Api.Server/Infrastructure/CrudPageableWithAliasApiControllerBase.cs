@@ -41,15 +41,21 @@ namespace MathSite.Api.Server.Infrastructure
         {
         }
 
+        protected abstract bool GetAliasWithAccessCheck { get; }
+
         [HttpGet(MethodNames.Global.GetByAlias)]
-        public async Task<ApiResponse<TViewModel>> GetByAliasAsync(string alias)
+        public virtual async Task<ApiResponse<TViewModel>> GetByAliasAsync(string alias)
         {
-            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Global.GetByAlias, async () =>
+            async Task<TViewModel> GetByAliasPredicate()
             {
                 var entity = await Repository.Where(e => e.Alias == alias).FirstAsync();
                 var model = Mapper.Map<TEntity, TViewModel>(entity);
                 return model;
-            });
+            }
+
+            return GetAliasWithAccessCheck 
+                ? await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Global.GetByAlias, GetByAliasPredicate)
+                : await ExecuteSafely(GetByAliasPredicate);
         }
     }
 }

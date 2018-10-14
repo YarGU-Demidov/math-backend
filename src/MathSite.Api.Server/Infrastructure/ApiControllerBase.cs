@@ -48,7 +48,7 @@ namespace MathSite.Api.Server.Infrastructure
             }
             catch (Exception e)
             {
-                return new ErrorApiResponse<T>(e.Message);
+                return new ErrorApiResponse<T>(e.Message, e.ToString());
             }
         }
     }
