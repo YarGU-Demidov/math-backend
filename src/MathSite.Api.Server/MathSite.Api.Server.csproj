@@ -20,7 +20,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="7.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="5.0.1" />
-    <PackageReference Include="MathSite.Api.Services" Version="1.0.30" />
+    <PackageReference Include="MathSite.Api.Services" Version="1.0.31" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.3.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.5" />
@@ -30,7 +30,6 @@
     <ProjectReference Include="..\MathSite.Api.Common\MathSite.Api.Common.csproj" />
     <ProjectReference Include="..\MathSite.Api.Db\MathSite.Api.Db.csproj" />
     <ProjectReference Include="..\MathSite.Api.Entities\MathSite.Api.Entities.csproj" />
-    <ProjectReference Include="..\MathSite.Api.Repositories\MathSite.Api.Repositories.csproj" />
     <ProjectReference Include="..\MathSite.Api.Specifications\MathSite.Api.Specifications.csproj" />
   </ItemGroup>
 

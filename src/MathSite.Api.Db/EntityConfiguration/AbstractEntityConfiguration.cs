@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MathSite.Api.Db.EntityConfiguration
 {
-    public abstract class AbstractEntityConfiguration<T> : AbstractEntityConfiguration<T, Guid> where T : class, IEntity<Guid> { }
+    public abstract class AbstractEntityConfiguration<T> : AbstractEntityConfiguration<T, Guid> where T : Entity<Guid> { }
 
     /// <inheritdoc />
-    public abstract class AbstractEntityConfiguration<T, TEntityKey> : IEntityTypeConfiguration<T> where T : class, IEntity<TEntityKey>
+    public abstract class AbstractEntityConfiguration<T, TEntityKey> : IEntityTypeConfiguration<T> where T : Entity<TEntityKey>
     {
         protected abstract string TableName { get; }
 

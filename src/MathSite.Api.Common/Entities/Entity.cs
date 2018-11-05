@@ -9,7 +9,7 @@ namespace MathSite.Api.Common.Entities
     ///     A shortcut of <see cref="T:MathSite.Api.Common.Entities.Entity`1" /> for most used primary key type (<see cref="T:System.Guid" />).
     /// </summary>
     [Serializable]
-    public abstract class Entity : Entity<Guid>, IEntity
+    public abstract class Entity : Entity<Guid>
     {
     }
 
@@ -19,7 +19,7 @@ namespace MathSite.Api.Common.Entities
     /// </summary>
     /// <typeparam name="TPrimaryKey">Type of the primary key of the entity</typeparam>
     [Serializable]
-    public abstract class Entity<TPrimaryKey> : IEntity<TPrimaryKey>, IEquatable<Entity<TPrimaryKey>>
+    public abstract class Entity<TPrimaryKey> : IEquatable<Entity<TPrimaryKey>>
     {
         /// <inheritdoc />
         /// <summary>

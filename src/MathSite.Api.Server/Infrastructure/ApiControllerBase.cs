@@ -18,27 +18,6 @@ namespace MathSite.Api.Server.Infrastructure
         protected MathSiteDbContext Context { get; }
         protected MathServices Services { get; }
 
-        protected abstract string AreaName { get; }
-
-        protected virtual async Task MethodAccessCheck(string methodName)
-        {
-            var accessAllowed = await Services.Users.HasCurrentUserRightAsync($"{AreaName}.{methodName}");
-
-            if (accessAllowed)
-                return;
-
-            throw new MethodAccessException("You've got no access to this method.");
-        }
-
-        protected async Task<ApiResponse<T>> ExecuteSafelyWithMethodAccessCheck<T>(string methodName, Func<Task<T>> action)
-        {
-            return await ExecuteSafely(async () =>
-            {
-                await MethodAccessCheck(methodName);
-                return await action();
-            });
-        }
-
         protected async Task<ApiResponse<T>> ExecuteSafely<T>(Func<Task<T>> action)
         {
             try
@@ -49,6 +28,19 @@ namespace MathSite.Api.Server.Infrastructure
             catch (Exception e)
             {
                 return new ErrorApiResponse<T>(e.Message, e.ToString());
+            }
+        }
+
+        protected async Task<ApiResponse> ExecuteSafely(Func<Task> voidAction)
+        {
+            try
+            {
+                await voidAction();
+                return new VoidApiResponse<string>();
+            }
+            catch (Exception e)
+            {
+                return new ErrorApiResponse<string>(e.Message, e.ToString());
             }
         }
     }

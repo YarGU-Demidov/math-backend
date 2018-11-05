@@ -14,7 +14,10 @@ using MathSite.Api.Dto;
 using MathSite.Api.Entities;
 using MathSite.Api.Internal;
 using MathSite.Api.Server.Infrastructure;
-using MathSite.Api.Server.Infrastructure.VersionsAttributes;
+using MathSite.Api.Server.Infrastructure.Attributes;
+using MathSite.Api.Server.Infrastructure.Attributes.VersionsAttributes;
+using MathSite.Api.Server.Infrastructure.CommonServiceMethods;
+using MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1;
 using MathSite.Api.Services.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,47 +27,91 @@ namespace MathSite.Api.Server.Controllers
     [V1]
     [DefaultApiRoute(ServiceNames.Users)]
     [ApiController]
-    public class UsersController : CrudPageableApiControllerBase<UserDto, User>
+    public class UsersController : EntityApiControllerBase<User>, IUserService
     {
+        private const string ServiceName = ServiceNames.Users;
         private readonly IPasswordsManager _passwordsManager;
+        private readonly CrudServiceMethods<User, UserDto> _crudServiceMethods;
+        private readonly PageableServiceMethods<User, UserDto> _pageableServiceMethods;
+        private readonly CountableServiceMethods<User> _countableServiceMethods;
 
         public UsersController(
             MathSiteDbContext context,
-            IPasswordsManager passwordsManager,
             MathServices services,
-            IMapper mapper
+            IMapper mapper,
+            IPasswordsManager passwordsManager,
+            CrudServiceMethods<User, UserDto> crudServiceMethods,
+            PageableServiceMethods<User, UserDto> pageableServiceMethods,
+            CountableServiceMethods<User> countableServiceMethods
         ) : base(context, services, mapper)
         {
             _passwordsManager = passwordsManager;
+            _crudServiceMethods = crudServiceMethods;
+            _pageableServiceMethods = pageableServiceMethods;
+            _countableServiceMethods = countableServiceMethods;
         }
 
-        protected override string AreaName { get; } = ServiceNames.Users;
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.GetOne)]
+        public Task<ApiResponse<UserDto>> GetById(Guid id)
+        {
+            return ExecuteSafely(async () => await _crudServiceMethods.GetById(id));
+        }
 
-        [HttpGet(MethodNames.Users.GetAll)]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Create)]
+        public Task<ApiResponse<Guid>> CreateAsync(UserDto viewModel)
+        {
+            return ExecuteSafely(async () => await _crudServiceMethods.CreateAsync(viewModel, ViewModelToEntityAsync));
+        }
+
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Update)]
+        public Task<ApiResponse<Guid>> UpdateAsync(UserDto viewModel)
+        {
+            return ExecuteSafely(async () => await _crudServiceMethods.UpdateAsync(viewModel, ViewModelToEntityAsync));
+        }
+
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
+        public Task<ApiResponse> DeleteAsync(Guid id)
+        {
+            return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
+        }
+
+        [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
+        public Task<ApiResponse<IEnumerable<UserDto>>> GetAllPagedAsync(int page, int perPage)
+        {
+            return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
+        }
+
+        [AuthorizeMethod(ServiceName, MethodNames.Global.GetCount)]
+        public Task<ApiResponse<int>> GetCountAsync()
+        {
+            return ExecuteSafely(() => _countableServiceMethods.GetCountAsync());
+        }
+
+        [AuthorizeMethod(ServiceName, MethodNames.Users.GetAll)]
         public async Task<ApiResponse<IEnumerable<UserDto>>> GetAllAsync()
         {
-            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Users.GetAll, async () =>
+            return await ExecuteSafely(async () =>
             {
                 var data = await Repository.Select(user => Mapper.Map<UserDto>(user)).ToArrayAsync();
                 return (IEnumerable<UserDto>) data;
             });
         }
 
-        [HttpGet(MethodNames.Users.GetByLogin)]
+        [AuthorizeMethod(ServiceName, MethodNames.Users.GetByLogin)]
         public async Task<ApiResponse<UserDto>> GetByLoginAsync(string login)
         {
-            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Users.GetByLogin, async () =>
+            return await ExecuteSafely(async () =>
             {
                 var user = await Repository.FirstOrDefaultAsync(u => login == u.Login);
                 var userDto = Mapper.Map<UserDto>(user);
                 return userDto;
             });
         }
-
-        [HttpPost(MethodNames.Users.GetByLoginAndPassword)]
+        
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Users.GetByLoginAndPassword)]
         public async Task<ApiResponse<UserDto>> GetByLoginAndPasswordAsync(string login, string password)
         {
-            return await ExecuteSafelyWithMethodAccessCheck(MethodAccessNames.Users.GetByLoginAndPassword, async () =>
+            return await ExecuteSafely(async () =>
             {
                 var user = await Repository.FirstOrDefaultAsync(u => login == u.Login);
                 var passwordsAreEqual = _passwordsManager.PasswordsAreEqual(login, password, user.PasswordHash);
@@ -77,13 +124,12 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
-        [HttpGet(MethodNames.Users.HasRight)]
         public async Task<ApiResponse<bool>> HasRightAsync(Guid userId, string rightAlias)
         {
             return await ExecuteSafely(async () =>
             {
                 var isGuest = userId == Guid.Empty || await Repository.CountAsync(user => user.Id == userId) == 0;
-                
+
                 // если гость, то userId должен быть 100% Empty.
                 if (isGuest && userId != Guid.Empty)
                     throw new EntityNotFoundException(ExceptionsDescriptions.EntityNotFound);
@@ -95,7 +141,8 @@ namespace MathSite.Api.Server.Controllers
                 if (isAdmin)
                 {
                     hasRight = await Repository.AnyAsync(
-                        user => user.Id == userId && user.UserRights.Where(right => right.Right.Alias == rightAlias).All(right => right.Allowed)
+                        user => user.Id == userId && user.UserRights.Where(right => right.Right.Alias == rightAlias)
+                                    .All(right => right.Allowed)
                     );
                 }
                 else if (isGuest)
@@ -117,12 +164,11 @@ namespace MathSite.Api.Server.Controllers
                             )
                         );
                 }
-                
+
                 return hasRight;
             });
         }
 
-        [HttpGet(MethodNames.Users.HasCurrentUserRight)]
         public async Task<ApiResponse<bool>> HasCurrentUserRightAsync(string rightAlias)
         {
             return await ExecuteSafely(async () =>
@@ -132,8 +178,8 @@ namespace MathSite.Api.Server.Controllers
                 return await Services.Users.HasRightAsync(userId, rightAlias);
             });
         }
-        
-        protected override async Task<User> ViewModelToEntityAsync(UserDto viewModel, ActionType actionType)
+
+        protected async Task<User> ViewModelToEntityAsync(UserDto viewModel, ActionType actionType)
         {
             User user;
             if (actionType == ActionType.Create)
@@ -144,7 +190,7 @@ namespace MathSite.Api.Server.Controllers
             else
             {
                 user = await Repository.FirstOrDefaultAsync(u => u.Id == viewModel.Id);
-                
+
                 var userLogin = user.Login;
                 Mapper.Map(viewModel, user);
                 user.Login = userLogin;

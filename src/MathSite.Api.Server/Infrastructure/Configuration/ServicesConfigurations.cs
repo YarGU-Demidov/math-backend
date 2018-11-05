@@ -7,7 +7,6 @@ using MathSite.Api.Common.Crypto;
 using MathSite.Api.Common.FileFormats;
 using MathSite.Api.Common.FileStorage;
 using MathSite.Api.Db;
-using MathSite.Api.Repositories.Core;
 using MathSite.Api.Services.Infrastructure;
 using MathSite.Common.ApiServiceRequester.Abstractions;
 using MathSite.Common.ApiServiceRequester.UriBuilders;
@@ -74,7 +73,6 @@ namespace MathSite.Api.Server.Infrastructure.Configuration
 
             services.Configure<Settings>(configuration);
             services.AddSingleton<FileFormatBuilder>();
-            services.AddRepositories();
             services.AddStorage<LocalFileSystemStorage>();
 
             // for uploading really large files.

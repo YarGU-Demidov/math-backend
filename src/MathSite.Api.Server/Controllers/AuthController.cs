@@ -12,7 +12,8 @@ using MathSite.Api.Db;
 using MathSite.Api.Dto;
 using MathSite.Api.Internal;
 using MathSite.Api.Server.Infrastructure;
-using MathSite.Api.Server.Infrastructure.VersionsAttributes;
+using MathSite.Api.Server.Infrastructure.Attributes.VersionsAttributes;
+using MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1;
 using MathSite.Api.Services.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -23,9 +24,9 @@ namespace MathSite.Api.Server.Controllers
     [V1]
     [DefaultApiRoute(ServiceNames.Auth)]
     [ApiController]
-    public class AuthController : ApiControllerBase
+    public class AuthController : ApiControllerBase, IAuthService
     {
-        private static string UserIdClaimName = "UserId";
+        private const string UserIdClaimName = "UserId";
 
         private readonly ExtendedAuthData _authData;
 
@@ -38,7 +39,7 @@ namespace MathSite.Api.Server.Controllers
             _authData = authOptions.Value;
         }
 
-        protected override string AreaName { get; } = ServiceNames.Auth;
+        protected const string ServiceName = ServiceNames.Auth;
 
         [HttpGet(MethodNames.Auth.GetCurrentUserId)]
         public Task<ApiResponse<Guid>> GetCurrentUserIdAsync()
@@ -103,6 +104,86 @@ namespace MathSite.Api.Server.Controllers
                     Expires = expires
                 };
             });
+        }
+
+
+        public async Task SeedRights()
+        {
+            var all = new Dictionary<string, string>
+            {
+                {ServiceNames.Groups, MethodNames.Groups.GetGroupsByType},
+                {ServiceNames.Groups, MethodNames.Groups.HasRight},
+
+                {ServiceNames.Auth, MethodNames.Auth.GetCurrentUserId},
+                {ServiceNames.Auth, MethodNames.Auth.GetToken},
+
+                {ServiceNames.Directories, MethodNames.Directories.GetDirectoryWithPath},
+                {ServiceNames.Directories, MethodNames.Directories.MoveDirectories},
+
+                {ServiceNames.Files, MethodNames.Files.GetFileById},
+                {ServiceNames.Files, MethodNames.Files.GetFilesByExtensions},
+                {ServiceNames.Files, MethodNames.Files.PutFile},
+
+                {ServiceNames.Persons, MethodNames.Persons.GetAllWithoutProfessors},
+                {ServiceNames.Persons, MethodNames.Persons.GetAllWithoutUsers},
+
+                {ServiceNames.PostSeoSettings, MethodNames.PostSeoSettings.GetByPostId},
+
+                {ServiceNames.PostSettings, MethodNames.PostSettings.GetByPostId},
+
+                {ServiceNames.PostTypes, MethodNames.PostTypes.GetByPostId},
+
+                {ServiceNames.Posts, MethodNames.Posts.GetPagesCount},
+                
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetDefaultHomePageTitle},
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetDefaultNewsPageTitle},
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetPerPageCount},
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetSiteName},
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetTitleDelimiter},
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetDefaultHomePageTitle},
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetDefaultNewsPageTitle},
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetPerPageCount},
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetSiteName},
+                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetTitleDelimiter},
+            };
+
+            AddCrud(all, ServiceNames.Users);
+            AddCrud(all, ServiceNames.Professors);
+            AddCrudWithAlias(all, ServiceNames.PostTypes);
+            AddCrud(all, ServiceNames.PostSettings);
+            AddCrud(all, ServiceNames.PostSeoSettings);
+            AddCrud(all, ServiceNames.Posts);
+            AddCrud(all, ServiceNames.Persons);
+            AddCrudWithAlias(all, ServiceNames.Groups);
+            AddCrud(all, ServiceNames.Directories);
+            AddCrud(all, ServiceNames.Files);
+            AddCrudWithAlias(all, ServiceNames.Categories);
+        }
+        
+        private void AddCountable(Dictionary<string, string> dict, string serviceName)
+        {
+            dict.Add(serviceName, MethodNames.Global.GetCount);
+        }
+        
+        private void AddPageable(Dictionary<string, string> dict, string serviceName)
+        {
+            AddCountable(dict, serviceName);
+            dict.Add(serviceName, MethodNames.Global.GetPaged);
+        }
+
+        private void AddCrud(Dictionary<string, string> dict, string serviceName)
+        {
+            AddPageable(dict, serviceName);
+            dict.Add(serviceName, MethodNames.Global.Create);
+            dict.Add(serviceName, MethodNames.Global.Delete);
+            dict.Add(serviceName, MethodNames.Global.Update);
+            dict.Add(serviceName, MethodNames.Global.GetOne);
+        }
+        
+        private void AddCrudWithAlias(Dictionary<string, string> dict, string serviceName)
+        {
+            AddCrud(dict, serviceName);
+            dict.Add(serviceName, MethodNames.Global.GetByAlias);
         }
 
         private async Task<ClaimsIdentity> GetIdentityAsync(string login, string password)
