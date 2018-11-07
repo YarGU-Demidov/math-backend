@@ -7,10 +7,11 @@ using MathSite.Api.Common.Crypto;
 using MathSite.Api.Common.FileFormats;
 using MathSite.Api.Common.FileStorage;
 using MathSite.Api.Db;
+using MathSite.Api.Server.Authorization;
 using MathSite.Api.Services.Infrastructure;
-using MathSite.Common.ApiServiceRequester.Abstractions;
 using MathSite.Common.ApiServiceRequester.UriBuilders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -91,6 +92,7 @@ namespace MathSite.Api.Server.Infrastructure.Configuration
             services.Configure<ExtendedAuthData>(authSection);
 
             services.AddScoped<IPasswordsManager, DoubleSha512HashPasswordsManager>();
+            services.AddSingleton<IAuthorizationPolicyProvider, RightPolicyProvider>();
 
             return services;
         }

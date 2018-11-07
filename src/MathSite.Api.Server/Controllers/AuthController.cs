@@ -10,6 +10,7 @@ using MathSite.Api.Common.Extensions;
 using MathSite.Api.Core;
 using MathSite.Api.Db;
 using MathSite.Api.Dto;
+using MathSite.Api.Entities;
 using MathSite.Api.Internal;
 using MathSite.Api.Server.Infrastructure;
 using MathSite.Api.Server.Infrastructure.Attributes.VersionsAttributes;
@@ -106,46 +107,45 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
-
+        [HttpGet("seed")]
         public async Task SeedRights()
         {
-            var all = new Dictionary<string, string>
-            {
-                {ServiceNames.Groups, MethodNames.Groups.GetGroupsByType},
-                {ServiceNames.Groups, MethodNames.Groups.HasRight},
+            var all = new List<string>();
 
-                {ServiceNames.Auth, MethodNames.Auth.GetCurrentUserId},
-                {ServiceNames.Auth, MethodNames.Auth.GetToken},
+            all.Add(GetName(ServiceNames.Groups, MethodNames.Groups.GetGroupsByType));
+            all.Add(GetName(ServiceNames.Groups, MethodNames.Groups.HasRight));
 
-                {ServiceNames.Directories, MethodNames.Directories.GetDirectoryWithPath},
-                {ServiceNames.Directories, MethodNames.Directories.MoveDirectories},
+            all.Add(GetName(ServiceNames.Auth, MethodNames.Auth.GetCurrentUserId));
+            all.Add(GetName(ServiceNames.Auth, MethodNames.Auth.GetToken));
 
-                {ServiceNames.Files, MethodNames.Files.GetFileById},
-                {ServiceNames.Files, MethodNames.Files.GetFilesByExtensions},
-                {ServiceNames.Files, MethodNames.Files.PutFile},
+            all.Add(GetName(ServiceNames.Directories, MethodNames.Directories.GetDirectoryWithPath));
+            all.Add(GetName(ServiceNames.Directories, MethodNames.Directories.MoveDirectories));
 
-                {ServiceNames.Persons, MethodNames.Persons.GetAllWithoutProfessors},
-                {ServiceNames.Persons, MethodNames.Persons.GetAllWithoutUsers},
+            all.Add(GetName(ServiceNames.Files, MethodNames.Files.GetFileById));
+            all.Add(GetName(ServiceNames.Files, MethodNames.Files.GetFilesByExtensions));
+            all.Add(GetName(ServiceNames.Files, MethodNames.Files.PutFile));
 
-                {ServiceNames.PostSeoSettings, MethodNames.PostSeoSettings.GetByPostId},
-
-                {ServiceNames.PostSettings, MethodNames.PostSettings.GetByPostId},
-
-                {ServiceNames.PostTypes, MethodNames.PostTypes.GetByPostId},
-
-                {ServiceNames.Posts, MethodNames.Posts.GetPagesCount},
-                
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetDefaultHomePageTitle},
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetDefaultNewsPageTitle},
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetPerPageCount},
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetSiteName},
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.GetTitleDelimiter},
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetDefaultHomePageTitle},
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetDefaultNewsPageTitle},
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetPerPageCount},
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetSiteName},
-                {ServiceNames.SiteSettings, MethodNames.SiteSettings.SetTitleDelimiter},
-            };
+            all.Add(GetName(ServiceNames.Persons, MethodNames.Persons.GetAllWithoutProfessors));
+            all.Add(GetName(ServiceNames.Persons, MethodNames.Persons.GetAllWithoutUsers));
+            
+            all.Add(GetName(ServiceNames.PostSeoSettings, MethodNames.PostSeoSettings.GetByPostId));
+            
+            all.Add(GetName(ServiceNames.PostSettings, MethodNames.PostSettings.GetByPostId));
+            
+            all.Add(GetName(ServiceNames.PostTypes, MethodNames.PostTypes.GetByPostId));
+            
+            all.Add(GetName(ServiceNames.Posts, MethodNames.Posts.GetPagesCount));
+            
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.GetDefaultHomePageTitle));
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.GetDefaultNewsPageTitle));
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.GetPerPageCount));
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.GetSiteName));
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.GetTitleDelimiter));
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.SetDefaultHomePageTitle));
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.SetDefaultNewsPageTitle));
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.SetPerPageCount));
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.SetSiteName));
+            all.Add(GetName(ServiceNames.SiteSettings, MethodNames.SiteSettings.SetTitleDelimiter));
 
             AddCrud(all, ServiceNames.Users);
             AddCrud(all, ServiceNames.Professors);
@@ -158,32 +158,58 @@ namespace MathSite.Api.Server.Controllers
             AddCrud(all, ServiceNames.Directories);
             AddCrud(all, ServiceNames.Files);
             AddCrudWithAlias(all, ServiceNames.Categories);
-        }
-        
-        private void AddCountable(Dictionary<string, string> dict, string serviceName)
-        {
-            dict.Add(serviceName, MethodNames.Global.GetCount);
-        }
-        
-        private void AddPageable(Dictionary<string, string> dict, string serviceName)
-        {
-            AddCountable(dict, serviceName);
-            dict.Add(serviceName, MethodNames.Global.GetPaged);
+            
+            all.Sort();
+
+            var rights = all.Select(rightAlias => new Right
+            {
+                Alias = rightAlias,
+                Name = new string(
+                    rightAlias.Replace("-", " ")
+                        .Split(".", StringSplitOptions.RemoveEmptyEntries)
+                        .Select(
+                            (s, idx) => idx == 0 
+                                ? s.FirstCharToUpper() + "/" 
+                                : s.FirstCharToUpper()
+                        )
+                        .SelectMany(s1 => s1)
+                        .ToArray()
+                )
+            }).ToArray();
+
+            Context.Rights.AddRange(rights);
+            await Context.SaveChangesAsync();
         }
 
-        private void AddCrud(Dictionary<string, string> dict, string serviceName)
+        private string GetName(string service, string method)
         {
-            AddPageable(dict, serviceName);
-            dict.Add(serviceName, MethodNames.Global.Create);
-            dict.Add(serviceName, MethodNames.Global.Delete);
-            dict.Add(serviceName, MethodNames.Global.Update);
-            dict.Add(serviceName, MethodNames.Global.GetOne);
+            return $"{service}.{method}";
         }
         
-        private void AddCrudWithAlias(Dictionary<string, string> dict, string serviceName)
+        private void AddCountable(List<string> dict, string serviceName)
+        {
+            dict.Add(GetName(serviceName, MethodNames.Global.GetCount));
+        }
+        
+        private void AddPageable(List<string> dict, string serviceName)
+        {
+            AddCountable(dict, serviceName);
+            dict.Add(GetName(serviceName, MethodNames.Global.GetPaged));
+        }
+
+        private void AddCrud(List<string> dict, string serviceName)
+        {
+            AddPageable(dict, serviceName);
+            dict.Add(GetName(serviceName, MethodNames.Global.Create));
+            dict.Add(GetName(serviceName, MethodNames.Global.Delete));
+            dict.Add(GetName(serviceName, MethodNames.Global.Update));
+            dict.Add(GetName(serviceName, MethodNames.Global.GetOne));
+        }
+        
+        private void AddCrudWithAlias(List<string> dict, string serviceName)
         {
             AddCrud(dict, serviceName);
-            dict.Add(serviceName, MethodNames.Global.GetByAlias);
+            dict.Add(GetName(serviceName, MethodNames.Global.GetByAlias));
         }
 
         private async Task<ClaimsIdentity> GetIdentityAsync(string login, string password)

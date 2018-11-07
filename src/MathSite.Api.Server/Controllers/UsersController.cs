@@ -124,6 +124,7 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Users.HasRight)]
         public async Task<ApiResponse<bool>> HasRightAsync(Guid userId, string rightAlias)
         {
             return await ExecuteSafely(async () =>
@@ -169,6 +170,7 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Users.HasCurrentUserRight)]
         public async Task<ApiResponse<bool>> HasCurrentUserRightAsync(string rightAlias)
         {
             return await ExecuteSafely(async () =>
