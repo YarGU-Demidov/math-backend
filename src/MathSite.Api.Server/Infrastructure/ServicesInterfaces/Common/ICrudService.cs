@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using MathSite.Api.Core;
-using MathSite.Api.Internal;
-using Microsoft.AspNetCore.Mvc;
 
 namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.Common
 {
@@ -15,16 +13,9 @@ namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.Common
         where TViewModel : BaseEntity<TPrimaryKey>
         where TPrimaryKey : IComparable<TPrimaryKey>
     {
-        [HttpGet(MethodNames.Global.GetOne)]
         Task<ApiResponse<TViewModel>> GetById(TPrimaryKey id);
-
-        [HttpPost(MethodNames.Global.Create)]
         Task<ApiResponse<TPrimaryKey>> CreateAsync(TViewModel viewModel);
-
-        [HttpPost(MethodNames.Global.Update)]
         Task<ApiResponse<TPrimaryKey>> UpdateAsync(TViewModel viewModel);
-
-        [HttpPost(MethodNames.Global.Delete)]
         Task<ApiResponse> DeleteAsync(TPrimaryKey id);
     }
 }

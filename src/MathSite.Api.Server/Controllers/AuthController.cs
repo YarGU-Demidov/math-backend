@@ -13,6 +13,7 @@ using MathSite.Api.Dto;
 using MathSite.Api.Entities;
 using MathSite.Api.Internal;
 using MathSite.Api.Server.Infrastructure;
+using MathSite.Api.Server.Infrastructure.Attributes;
 using MathSite.Api.Server.Infrastructure.Attributes.VersionsAttributes;
 using MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1;
 using MathSite.Api.Services.Infrastructure;
@@ -43,6 +44,7 @@ namespace MathSite.Api.Server.Controllers
         protected const string ServiceName = ServiceNames.Auth;
 
         [HttpGet(MethodNames.Auth.GetCurrentUserId)]
+        [AuthorizeMethod(ServiceName, MethodNames.Auth.GetCurrentUserId)]
         public Task<ApiResponse<Guid>> GetCurrentUserIdAsync()
         {
             return ExecuteSafely(() =>
@@ -73,6 +75,7 @@ namespace MathSite.Api.Server.Controllers
         }
 
         [HttpPost(MethodNames.Auth.GetToken)]
+        [AuthorizeMethod(ServiceName, MethodNames.Auth.GetToken)]
         public Task<ApiResponse<TokenDto>> GetTokenAsync(string login, string password)
         {
             return ExecuteSafely(async () =>

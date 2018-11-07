@@ -51,42 +51,49 @@ namespace MathSite.Api.Server.Controllers
             _countableServiceMethods = countableServiceMethods;
         }
 
+        [HttpGet(MethodNames.Global.GetOne)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.GetOne)]
         public Task<ApiResponse<UserDto>> GetById(Guid id)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.GetById(id));
         }
 
+        [HttpPost(MethodNames.Global.Create)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Create)]
         public Task<ApiResponse<Guid>> CreateAsync(UserDto viewModel)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.CreateAsync(viewModel, ViewModelToEntityAsync));
         }
 
+        [HttpPost(MethodNames.Global.Update)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Update)]
         public Task<ApiResponse<Guid>> UpdateAsync(UserDto viewModel)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.UpdateAsync(viewModel, ViewModelToEntityAsync));
         }
 
+        [HttpPost(MethodNames.Global.Delete)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
         public Task<ApiResponse> DeleteAsync(Guid id)
         {
             return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
         }
 
+        [HttpPost(MethodNames.Global.GetPaged)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
         public Task<ApiResponse<IEnumerable<UserDto>>> GetAllPagedAsync(int page, int perPage)
         {
             return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
         }
 
+        [HttpPost(MethodNames.Global.GetCount)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetCount)]
         public Task<ApiResponse<int>> GetCountAsync()
         {
             return ExecuteSafely(() => _countableServiceMethods.GetCountAsync());
         }
 
+        [HttpGet(MethodNames.Users.GetAll)]
         [AuthorizeMethod(ServiceName, MethodNames.Users.GetAll)]
         public async Task<ApiResponse<IEnumerable<UserDto>>> GetAllAsync()
         {
@@ -97,6 +104,7 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
+        [HttpGet(MethodNames.Users.GetByLogin)]
         [AuthorizeMethod(ServiceName, MethodNames.Users.GetByLogin)]
         public async Task<ApiResponse<UserDto>> GetByLoginAsync(string login)
         {
@@ -107,7 +115,8 @@ namespace MathSite.Api.Server.Controllers
                 return userDto;
             });
         }
-        
+
+        [HttpPost(MethodNames.Users.GetByLoginAndPassword)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Users.GetByLoginAndPassword)]
         public async Task<ApiResponse<UserDto>> GetByLoginAndPasswordAsync(string login, string password)
         {
@@ -124,6 +133,7 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
+        [HttpGet(MethodNames.Users.HasRight)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Users.HasRight)]
         public async Task<ApiResponse<bool>> HasRightAsync(Guid userId, string rightAlias)
         {
@@ -170,6 +180,7 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
+        [HttpGet(MethodNames.Users.HasCurrentUserRight)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Users.HasCurrentUserRight)]
         public async Task<ApiResponse<bool>> HasCurrentUserRightAsync(string rightAlias)
         {

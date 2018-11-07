@@ -45,42 +45,49 @@ namespace MathSite.Api.Server.Controllers
             _countableServiceMethods = countableServiceMethods;
         }
 
+        [HttpGet(MethodNames.Global.GetOne)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.GetOne)]
         public Task<ApiResponse<GroupDto>> GetById(Guid id)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.GetById(id));
         }
 
+        [HttpPost(MethodNames.Global.Create)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Create)]
         public Task<ApiResponse<Guid>> CreateAsync(GroupDto viewModel)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.CreateAsync(viewModel));
         }
 
+        [HttpPost(MethodNames.Global.Update)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Update)]
         public Task<ApiResponse<Guid>> UpdateAsync(GroupDto viewModel)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.UpdateAsync(viewModel));
         }
 
+        [HttpPost(MethodNames.Global.Delete)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
         public Task<ApiResponse> DeleteAsync(Guid id)
         {
             return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
         }
 
+        [HttpPost(MethodNames.Global.GetPaged)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetAllPagedAsync(int page, int perPage)
         {
             return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
         }
 
+        [HttpPost(MethodNames.Global.GetCount)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetCount)]
         public Task<ApiResponse<int>> GetCountAsync()
         {
             return ExecuteSafely(() => _countableServiceMethods.GetCountAsync());
         }
 
+        [HttpGet(MethodNames.Groups.HasRight)]
         public async Task<ApiResponse<bool>> HasRightAsync(Guid groupId, string rightAlias)
         {
             async Task<bool> HasRight()
@@ -107,6 +114,7 @@ namespace MathSite.Api.Server.Controllers
             return await ExecuteSafely(HasRight);
         }
 
+        [HttpGet(MethodNames.Groups.GetGroupsByType)]
         [AuthorizeMethod(ServiceName, MethodNames.Groups.GetGroupsByType)]
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetGroupsByTypeAsync(string groupTypeAlias)
         {

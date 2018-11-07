@@ -92,7 +92,9 @@ namespace MathSite.Api.Server.Infrastructure.Configuration
             services.Configure<ExtendedAuthData>(authSection);
 
             services.AddScoped<IPasswordsManager, DoubleSha512HashPasswordsManager>();
+            
             services.AddSingleton<IAuthorizationPolicyProvider, RightPolicyProvider>();
+            services.AddSingleton<IAuthorizationHandler, RightsAuthorizationHandler>();
 
             return services;
         }
