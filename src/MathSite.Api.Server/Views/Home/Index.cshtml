@@ -1,23 +1,33 @@
 ﻿@*@model TModel*@
 
 @{
-    ViewBag.Title = "title";
     Layout = "MainLayout";
 }
 
+<div class="index-page">
+    <h1 class="index-title">Yarolsavl State University</h1>
+    <h2 class="index-subtitle">Math Faculty API</h2>
+</div>
+
+
 <style>
-    .index-title {
+    .index-page {
+        width: 100%;
+
+        padding: 10px 10% 10px 10%;
+    }
+    
+    .index-title,
+    .index-subtitle {
+        text-transform: uppercase;
+        font-weight: 200;
+        text-align: center;
+        
         -moz-user-select: none;
         -ms-user-select: none;
         -webkit-user-select: none;
         user-select: none;
 
         cursor: default;
-
-        text-transform: uppercase;
-
-        padding: 10%;
     }
 </style>
-
-<h1 class="index-title">Welcome to Yaroslavl State University Math Faculty API!</h1>
