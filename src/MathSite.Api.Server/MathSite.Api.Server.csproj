@@ -13,7 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
@@ -30,7 +29,6 @@
     <ProjectReference Include="..\MathSite.Api.Common\MathSite.Api.Common.csproj" />
     <ProjectReference Include="..\MathSite.Api.Db\MathSite.Api.Db.csproj" />
     <ProjectReference Include="..\MathSite.Api.Entities\MathSite.Api.Entities.csproj" />
-    <ProjectReference Include="..\MathSite.Api.Specifications\MathSite.Api.Specifications.csproj" />
   </ItemGroup>
 
 </Project>

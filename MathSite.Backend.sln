@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Entities", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Db", "src\MathSite.Api.Db\MathSite.Api.Db.csproj", "{A0AE5512-FFDB-4BCF-BABE-1214C9D870CE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathSite.Api.Specifications", "src\MathSite.Api.Specifications\MathSite.Api.Specifications.csproj", "{5EA70D48-B6EA-42E0-9DF0-B0A5FD48D65C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,10 +37,6 @@ Global
 		{A0AE5512-FFDB-4BCF-BABE-1214C9D870CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0AE5512-FFDB-4BCF-BABE-1214C9D870CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0AE5512-FFDB-4BCF-BABE-1214C9D870CE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5EA70D48-B6EA-42E0-9DF0-B0A5FD48D65C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5EA70D48-B6EA-42E0-9DF0-B0A5FD48D65C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5EA70D48-B6EA-42E0-9DF0-B0A5FD48D65C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5EA70D48-B6EA-42E0-9DF0-B0A5FD48D65C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,7 +46,6 @@ Global
 		{28C06C1B-2BEE-4976-93C3-53D78F8FE650} = {9B5BC935-511B-47CC-8ADE-70DD7B508890}
 		{B1F15B8B-EF5B-4D0F-8BE2-2685628AD09F} = {9B5BC935-511B-47CC-8ADE-70DD7B508890}
 		{A0AE5512-FFDB-4BCF-BABE-1214C9D870CE} = {9B5BC935-511B-47CC-8ADE-70DD7B508890}
-		{5EA70D48-B6EA-42E0-9DF0-B0A5FD48D65C} = {9B5BC935-511B-47CC-8ADE-70DD7B508890}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ABD38E25-CDE6-4537-B845-D16B59C460E3}
