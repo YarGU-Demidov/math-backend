@@ -29,13 +29,13 @@ namespace MathSite.Api.Db.DataSeeding.Seeders
                 GetGroupByGroupTypeAlias(GroupTypeAliases.User)
             );
 
-            var postGroupsAlloweds = new[]
+            var postGroupsAllowed = new[]
             {
                 firstPostGroupsAllowed,
                 secondPostGroupsAllowed
             };
 
-            Context.PostGroupsAlloweds.AddRange(postGroupsAlloweds);
+            Context.PostGroupsAllowed.AddRange(postGroupsAllowed);
         }
 
         private Group GetGroupByGroupTypeAlias(string alias)

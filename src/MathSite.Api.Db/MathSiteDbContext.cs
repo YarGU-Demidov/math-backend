@@ -1,4 +1,4 @@
-﻿using MathSite.Api.Db.EntityConfiguration.EntitiesConfigurations;
+﻿using MathSite.Api.Db.EntityConfiguration;
 using MathSite.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,18 +29,18 @@ namespace MathSite.Api.Db
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostAttachment> PostAttachments { get; set; }
         public DbSet<PostCategory> PostCategories { get; set; }
-        public DbSet<PostGroupsAllowed> PostGroupsAlloweds { get; set; }
+        public DbSet<PostGroupsAllowed> PostGroupsAllowed { get; set; }
         public DbSet<PostKeyword> PostKeywords { get; set; }
         public DbSet<PostOwner> PostOwners { get; set; }
         public DbSet<PostRating> PostRatings { get; set; }
         public DbSet<PostSeoSetting> PostSeoSettings { get; set; }
         public DbSet<PostSetting> PostSettings { get; set; }
         public DbSet<PostType> PostTypes { get; set; }
-        public DbSet<PostUserAllowed> PostUserAlloweds { get; set; }
+        public DbSet<PostUserAllowed> PostUserAllowed { get; set; }
         public DbSet<Right> Rights { get; set; }
         public DbSet<SiteSetting> SiteSettings { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<UserSetting> UserSettingses { get; set; }
+        public DbSet<UserSetting> UserSettings { get; set; }
         public DbSet<UsersRight> UsersRights { get; set; }
         public DbSet<Professor> Professors { get; set; }
 
@@ -50,32 +50,7 @@ namespace MathSite.Api.Db
         /// <inheritdoc />
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new CategoryConfiguration());
-            modelBuilder.ApplyConfiguration(new DirectoryConfiguration());
-            modelBuilder.ApplyConfiguration(new CommentConfiguration());
-            modelBuilder.ApplyConfiguration(new FileConfiguration());
-            modelBuilder.ApplyConfiguration(new GroupRightsConfiguration());
-            modelBuilder.ApplyConfiguration(new GroupTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new KeywordsConfiguration());
-            modelBuilder.ApplyConfiguration(new GroupConfiguration());
-            modelBuilder.ApplyConfiguration(new PersonConfiguration());
-            modelBuilder.ApplyConfiguration(new ProfessorConfiguration());
-            modelBuilder.ApplyConfiguration(new PostAttachmentConfiguration());
-            modelBuilder.ApplyConfiguration(new PostCategoryConfiguration());
-            modelBuilder.ApplyConfiguration(new PostConfiguration());
-            modelBuilder.ApplyConfiguration(new PostGroupsAllowedConfiguration());
-            modelBuilder.ApplyConfiguration(new PostKeywordsConfiguration());
-            modelBuilder.ApplyConfiguration(new PostOwnerConfiguration());
-            modelBuilder.ApplyConfiguration(new PostRatingConfiguration());
-            modelBuilder.ApplyConfiguration(new PostSeoSettingsConfiguration());
-            modelBuilder.ApplyConfiguration(new PostSettingsConfiguration());
-            modelBuilder.ApplyConfiguration(new PostTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new PostUserAllowedConfiguration());
-            modelBuilder.ApplyConfiguration(new RightConfiguration());
-            modelBuilder.ApplyConfiguration(new SiteSettingsConfiguration());
-            modelBuilder.ApplyConfiguration(new UserRightsConfiguration());
-            modelBuilder.ApplyConfiguration(new UserConfiguration());
-            modelBuilder.ApplyConfiguration(new UserSettingsConfiguration());
+            modelBuilder.ApplyAllConfigurations();
 
             modelBuilder.HasPostgresExtension("uuid-ossp");
             base.OnModelCreating(modelBuilder);

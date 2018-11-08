@@ -39,7 +39,7 @@ namespace MathSite.Api.Db.DataSeeding.Seeders
                 secondUserSettings
             };
 
-            Context.UserSettingses.AddRange(userSettings);
+            Context.UserSettings.AddRange(userSettings);
         }
 
         private User GetUserByLogin(string login)

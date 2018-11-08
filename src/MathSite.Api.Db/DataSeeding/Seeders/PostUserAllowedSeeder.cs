@@ -35,7 +35,7 @@ namespace MathSite.Api.Db.DataSeeding.Seeders
                 secondPostUsersAllowed
             };
 
-            Context.PostUserAlloweds.AddRange(postsUsersAlloweds);
+            Context.PostUserAllowed.AddRange(postsUsersAlloweds);
         }
 
         private static PostUserAllowed CreatePostUsersAllowed(Post post, User user)
