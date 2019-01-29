@@ -30,7 +30,11 @@ namespace MathSite.Api.Server.Infrastructure.Configuration
             services
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-                .AddJsonOptions(options => { options.SerializerSettings.Formatting = Formatting.Indented; });
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.Formatting = Formatting.Indented;
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                });
 
             services.Configure<ApiBehaviorOptions>(options =>
             {

@@ -55,38 +55,51 @@ namespace MathSite.Api.Server.Controllers
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.GetOne)]
         public Task<ApiResponse<UserDto>> GetById(Guid id)
         {
-            return ExecuteSafely(async () => await _crudServiceMethods.GetById(id));
+            return ExecuteSafely(() => _crudServiceMethods.GetById(id));
         }
 
         [HttpPost(MethodNames.Global.Create)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Create)]
         public Task<ApiResponse<Guid>> CreateAsync(UserDto viewModel)
         {
-            return ExecuteSafely(async () => await _crudServiceMethods.CreateAsync(viewModel, ViewModelToEntityAsync));
+            return ExecuteSafely(() => _crudServiceMethods.CreateAsync(viewModel, ViewModelToEntityAsync));
         }
 
-        [HttpPost(MethodNames.Global.Update)]
+        [HttpPut(MethodNames.Global.Update)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Update)]
         public Task<ApiResponse<Guid>> UpdateAsync(UserDto viewModel)
         {
-            return ExecuteSafely(async () => await _crudServiceMethods.UpdateAsync(viewModel, ViewModelToEntityAsync));
+            return ExecuteSafely(() => _crudServiceMethods.UpdateAsync(viewModel, ViewModelToEntityAsync));
         }
 
-        [HttpPost(MethodNames.Global.Delete)]
+        [HttpDelete(MethodNames.Global.Delete)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
         public Task<ApiResponse> DeleteAsync(Guid id)
         {
             return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
         }
 
-        [HttpPost(MethodNames.Global.GetPaged)]
+        [HttpGet(MethodNames.Global.GetPaged)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
         public Task<ApiResponse<IEnumerable<UserDto>>> GetAllPagedAsync(int page, int perPage)
         {
             return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
         }
 
-        [HttpPost(MethodNames.Global.GetCount)]
+        [HttpGet("get-all-by-page-with-person")]
+        [AuthorizeMethod(ServiceName, "get-all-by-page-with-person")]
+        public Task<ApiResponse<IEnumerable<UserDto>>> GetAllPagedWithPersonAsync(int page, int perPage)
+        {
+            return ExecuteSafely(async () =>
+            {
+                page = page >= 1 ? page : 0;
+                perPage = perPage > 0 ? perPage : 0;
+
+                var user = await Repository.Include(u => u.Person).Skip(page * perPage).Take(perPage).Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
+                return (IEnumerable<UserDto>)user;
+            });
+        }
+        [HttpGet(MethodNames.Global.GetCount)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetCount)]
         public Task<ApiResponse<int>> GetCountAsync()
         {
@@ -95,20 +108,25 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpGet(MethodNames.Users.GetAll)]
         [AuthorizeMethod(ServiceName, MethodNames.Users.GetAll)]
-        public async Task<ApiResponse<IEnumerable<UserDto>>> GetAllAsync()
+        public Task<ApiResponse<IEnumerable<UserDto>>> GetAllAsync(bool withPerson = false)
         {
-            return await ExecuteSafely(async () =>
+            return  ExecuteSafely(async () =>
             {
-                var data = await Repository.Select(user => Mapper.Map<UserDto>(user)).ToArrayAsync();
-                return (IEnumerable<UserDto>) data;
+                if (withPerson)
+                {
+                    var user = await Repository.Include(u=>u.Person).Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
+                    return (IEnumerable<UserDto>)user;
+                }
+                var users = await Repository.Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
+                return (IEnumerable<UserDto>)users;
             });
         }
 
         [HttpGet(MethodNames.Users.GetByLogin)]
         [AuthorizeMethod(ServiceName, MethodNames.Users.GetByLogin)]
-        public async Task<ApiResponse<UserDto>> GetByLoginAsync(string login)
+        public Task<ApiResponse<UserDto>> GetByLoginAsync(string login)
         {
-            return await ExecuteSafely(async () =>
+            return ExecuteSafely(async () =>
             {
                 var user = await Repository.FirstOrDefaultAsync(u => login == u.Login);
                 var userDto = Mapper.Map<UserDto>(user);
@@ -118,9 +136,9 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpPost(MethodNames.Users.GetByLoginAndPassword)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Users.GetByLoginAndPassword)]
-        public async Task<ApiResponse<UserDto>> GetByLoginAndPasswordAsync(string login, string password)
+        public Task<ApiResponse<UserDto>> GetByLoginAndPasswordAsync(string login, string password)
         {
-            return await ExecuteSafely(async () =>
+            return ExecuteSafely(async () =>
             {
                 var user = await Repository.FirstOrDefaultAsync(u => login == u.Login);
                 var passwordsAreEqual = _passwordsManager.PasswordsAreEqual(login, password, user.PasswordHash);
@@ -135,9 +153,9 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpGet(MethodNames.Users.HasRight)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Users.HasRight)]
-        public async Task<ApiResponse<bool>> HasRightAsync(Guid userId, string rightAlias)
+        public Task<ApiResponse<bool>> HasRightAsync(Guid userId, string rightAlias)
         {
-            return await ExecuteSafely(async () =>
+            return ExecuteSafely(async () =>
             {
                 var isGuest = userId == Guid.Empty || await Repository.CountAsync(user => user.Id == userId) == 0;
 
@@ -182,9 +200,9 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpGet(MethodNames.Users.HasCurrentUserRight)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Users.HasCurrentUserRight)]
-        public async Task<ApiResponse<bool>> HasCurrentUserRightAsync(string rightAlias)
+        public Task<ApiResponse<bool>> HasCurrentUserRightAsync(string rightAlias)
         {
-            return await ExecuteSafely(async () =>
+            return ExecuteSafely(async () =>
             {
                 var userId = await Services.Auth.GetCurrentUserIdAsync();
 
