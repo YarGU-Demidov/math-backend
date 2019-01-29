@@ -84,8 +84,8 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _countableServiceMethods.GetCountAsync());
         }
 
-        [HttpGet(MethodNames.Users.GetAll)]
-        [AuthorizeMethod(ServiceName, MethodNames.Users.GetAll)]
+        [HttpGet(MethodNames.Persons.GetAll)]
+        [AuthorizeMethod(ServiceName, MethodNames.Persons.GetAll)]
         public Task<ApiResponse<IEnumerable<PersonDto>>> GetAllAsync()
         {
             return ExecuteSafely(async () =>
