@@ -46,8 +46,7 @@ namespace MathSite.Api.Server.Infrastructure.CommonServiceMethods
                 ? Repository
                 : Repository.Where(wherePredicate);
 
-            var entities = await repo.PageBy(perPage, skip).ToArrayAsync(cancellationToken);
-
+            var entities = await repo.PageBy(skip, perPage).ToArrayAsync(cancellationToken);
             var models = entities.Select(entity => Mapper.Map<TEntity, TViewModel>(entity));
 
             return models;
