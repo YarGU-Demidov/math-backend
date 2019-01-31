@@ -11,6 +11,7 @@ namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1
     {
         Task<ApiResponse<IEnumerable<PersonDto>>> GetAllAsync();
         Task<ApiResponse<IEnumerable<PersonDto>>> GetBySurnameAsync(string surname);
+        Task<ApiResponse<IEnumerable<PersonDto>>> GetBySurnameWithoutUsersAsync(string surname);
         Task<ApiResponse<IEnumerable<PersonDto>>> GetAllWithoutProfessorsAsync();
         Task<ApiResponse<IEnumerable<PersonDto>>> GetAllWithoutUsersAsync();
     }

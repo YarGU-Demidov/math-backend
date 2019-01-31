@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MathSite.Api.Core;
 using MathSite.Api.Internal;
@@ -16,6 +17,6 @@ namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.Common
         where TPrimaryKey : IComparable<TPrimaryKey>
     {
         [HttpGet(MethodNames.Global.GetByAlias)]
-        Task<ApiResponse<TViewModel>> GetByAliasAsync(string alias);
+        Task<ApiResponse<IEnumerable<TViewModel>>> GetByAliasAsync(string alias);
     }
 }
