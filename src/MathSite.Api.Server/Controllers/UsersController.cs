@@ -60,7 +60,7 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpPost(MethodNames.Global.Create)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Create)]
-        public Task<ApiResponse<Guid>> CreateAsync(UserDto viewModel)
+        public Task<ApiResponse<Guid>> CreateAsync([FromBody]UserDto viewModel)
         {
             return ExecuteSafely(() => _crudServiceMethods.CreateAsync(viewModel, ViewModelToEntityAsync));
         }
@@ -128,7 +128,7 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
-                var user = await Repository.FirstOrDefaultAsync(u => login == u.Login);
+                var user = await Repository.Include(u=> u.Person).FirstOrDefaultAsync(u => login == u.Login);
                 var userDto = Mapper.Map<UserDto>(user);
                 return userDto;
             });
