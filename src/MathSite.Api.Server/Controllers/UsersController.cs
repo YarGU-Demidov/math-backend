@@ -79,6 +79,16 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
         }
 
+        [HttpDelete("delete-many")]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
+        public Task<ApiResponse<int>> DeleteManyAsync([FromBody] List<Guid> ids)
+        {
+            return ExecuteSafely(() =>
+            {
+                return Context.Users.Where(x => ids.Contains(x.Id)).DeleteFromQueryAsync();
+            });
+        }
+
         [HttpGet(MethodNames.Global.GetPaged)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
         public Task<ApiResponse<IEnumerable<UserDto>>> GetAllPagedAsync(int page, int perPage)
