@@ -126,7 +126,6 @@ namespace MathSite.Api.Server.Controllers
         }
         
         [HttpGet(MethodNames.Groups.GetGroupsByType)]
-        [HttpGet(MethodNames.Groups.GetGroupsByType)]
         [AuthorizeMethod(ServiceName, MethodNames.Groups.GetGroupsByType)]
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetGroupsByTypeAsync(string groupTypeAlias)
         {
