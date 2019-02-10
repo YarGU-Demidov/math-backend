@@ -67,7 +67,7 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpPut(MethodNames.Global.Update)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Update)]
-        public Task<ApiResponse<Guid>> UpdateAsync(UserDto viewModel)
+        public Task<ApiResponse<Guid>> UpdateAsync([FromBody]UserDto viewModel)
         {
             return ExecuteSafely(() => _crudServiceMethods.UpdateAsync(viewModel, ViewModelToEntityAsync));
         }
@@ -96,8 +96,8 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
         }
 
-        [HttpGet("get-all-by-page-with-person")]
-        [AuthorizeMethod(ServiceName, "get-all-by-page-with-person")]
+        [HttpGet("get-all-by-page-nested")]
+        [AuthorizeMethod(ServiceName, "get-all-by-page-nested")]
         public Task<ApiResponse<IEnumerable<UserDto>>> GetAllPagedWithPersonAsync(int page, int perPage)
         {
             return ExecuteSafely(async () =>
@@ -105,7 +105,7 @@ namespace MathSite.Api.Server.Controllers
                 page = page >= 1 ? page : 0;
                 perPage = perPage > 0 ? perPage : 0;
 
-                var user = await Repository.Include(u => u.Person).Skip(page * perPage).Take(perPage).Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
+                var user = await Repository.Include(u => u.Person).Include(u=>u.Group).Skip(page * perPage).Take(perPage).Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
                 return (IEnumerable<UserDto>)user;
             });
         }
@@ -134,13 +134,12 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpGet(MethodNames.Users.GetByLogin)]
         [AuthorizeMethod(ServiceName, MethodNames.Users.GetByLogin)]
-        public Task<ApiResponse<UserDto>> GetByLoginAsync(string login)
+        public Task<ApiResponse<IEnumerable<UserDto>>> GetByLoginAsync(string login)
         {
             return ExecuteSafely(async () =>
             {
-                var user = await Repository.Include(u=> u.Person).FirstOrDefaultAsync(u => login == u.Login);
-                var userDto = Mapper.Map<UserDto>(user);
-                return userDto;
+                var users = await Repository.Include(u=> u.Person).Include(u=>u.Group).Where(u=>u.Login == login).Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
+                return (IEnumerable<UserDto>)users;
             });
         }
 

@@ -31,4 +31,10 @@
     <ProjectReference Include="..\MathSite.Api.Entities\MathSite.Api.Entities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Z.EntityFramework.Extensions.EFCore">
+      <HintPath>LocalPackages\Z.EntityFramework.Extensions.EFCore.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
