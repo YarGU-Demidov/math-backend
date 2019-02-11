@@ -106,13 +106,24 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
-        [HttpGet("get-by-surname")]
-        [AuthorizeMethod(ServiceName, "get-by-surname")]
+        [HttpGet("get-all-by-surname")]
+        [AuthorizeMethod(ServiceName, "get-all-by-surname")]
         public Task<ApiResponse<IEnumerable<PersonDto>>> GetBySurnameAsync(string surname)
         {
             return ExecuteSafely(async () =>
             {
-                var persons = await Repository.Where(p => p.Surname.Contains(surname)).Select(p=>Mapper.Map<PersonDto>(p)).ToArrayAsync();
+                var persons = await Repository.Where(p => p.Surname.ToLower().Contains(surname.ToLower())).Select(p=>Mapper.Map<PersonDto>(p)).ToArrayAsync();
+                return (IEnumerable<PersonDto>)persons;
+            });
+        }
+
+        [HttpGet("get-all-by-surname-without-users")]
+        [AuthorizeMethod(ServiceName, "get-all-by-surname-without-users")]
+        public Task<ApiResponse<IEnumerable<PersonDto>>> GetBySurnameWithoutUsersAsync(string surname)
+        {
+            return ExecuteSafely(async () =>
+            {
+                var persons = await Repository.Include(p=>p.User).Where(p => p.Surname.ToLower().Contains(surname.ToLower()) && p.User==null).Select(p => Mapper.Map<PersonDto>(p)).ToArrayAsync();
                 return (IEnumerable<PersonDto>)persons;
             });
         }

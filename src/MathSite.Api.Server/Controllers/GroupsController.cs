@@ -87,6 +87,17 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _countableServiceMethods.GetCountAsync());
         }
 
+        [HttpGet(MethodNames.Users.GetAll)]
+        [AuthorizeMethod(ServiceName, MethodNames.Users.GetAll)]
+        public Task<ApiResponse<IEnumerable<GroupDto>>> GetAllAsync()
+        {
+            return ExecuteSafely(async () =>
+            {
+                var groups = await Repository.Select(u => Mapper.Map<GroupDto>(u)).ToArrayAsync();
+                return (IEnumerable<GroupDto>) groups;
+            });
+        }
+
         [HttpGet(MethodNames.Groups.HasRight)]
         public async Task<ApiResponse<bool>> HasRightAsync(Guid groupId, string rightAlias)
         {
@@ -113,7 +124,7 @@ namespace MathSite.Api.Server.Controllers
 
             return await ExecuteSafely(HasRight);
         }
-
+        
         [HttpGet(MethodNames.Groups.GetGroupsByType)]
         [AuthorizeMethod(ServiceName, MethodNames.Groups.GetGroupsByType)]
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetGroupsByTypeAsync(string groupTypeAlias)
@@ -121,10 +132,15 @@ namespace MathSite.Api.Server.Controllers
             throw new NotImplementedException();
         }
 
+        [HttpGet(MethodNames.Global.GetByAlias)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetByAlias)]
-        public Task<ApiResponse<GroupDto>> GetByAliasAsync(string alias)
+        public Task<ApiResponse<IEnumerable<GroupDto>>> GetByAliasAsync(string alias)
         {
-            throw new NotImplementedException();
+            return ExecuteSafely(async () =>
+            {
+                var persons = await Repository.Where(p => p.Alias.ToLower().Contains(alias.ToLower())).Select(p => Mapper.Map<GroupDto>(p)).ToArrayAsync();
+                return (IEnumerable<GroupDto>)persons;
+            });
         }
     }
 }
