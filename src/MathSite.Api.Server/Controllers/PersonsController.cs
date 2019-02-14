@@ -77,6 +77,20 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
         }
 
+        [HttpGet("get-all-by-page-nested")]
+        [AuthorizeMethod(ServiceName, "get-all-by-page-nested")]
+        public Task<ApiResponse<IEnumerable<PersonDto>>> GetAllByPageWithUserAsync(int page, int perPage)
+        {
+            return ExecuteSafely(async () =>
+            {
+                page = page >= 1 ? page : 0;
+                perPage = perPage > 0 ? perPage : 0;
+
+                var persons = await Repository.Include(u => u.User).Skip(page * perPage).Take(perPage).Select(u => Mapper.Map<PersonDto>(u)).ToArrayAsync();
+                return (IEnumerable<PersonDto>)persons;
+            });
+        }
+
         [HttpGet(MethodNames.Global.GetCount)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetCount)]
         public Task<ApiResponse<int>> GetCountAsync()
