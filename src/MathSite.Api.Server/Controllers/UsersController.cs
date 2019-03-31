@@ -98,7 +98,7 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpGet("get-all-by-page-nested")]
         [AuthorizeMethod(ServiceName, "get-all-by-page-nested")]
-        public Task<ApiResponse<IEnumerable<UserDto>>> GetAllPagedWithPersonAsync(int page, int perPage)
+        public Task<ApiResponse<IEnumerable<UserDto>>> GetAllByPageNested(int page, int perPage)
         {
             return ExecuteSafely(async () =>
             {

@@ -80,6 +80,11 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
         }
 
+        public Task<ApiResponse<IEnumerable<GroupDto>>> GetAllByPageNested(int page, int perPage)
+        {
+            throw new NotImplementedException();
+        }
+
         [HttpPost(MethodNames.Global.GetCount)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetCount)]
         public Task<ApiResponse<int>> GetCountAsync()

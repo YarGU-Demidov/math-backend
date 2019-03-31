@@ -14,5 +14,6 @@ namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.Common
         where TViewModel : BaseEntity<TPrimaryKey>
     {
         Task<ApiResponse<IEnumerable<TViewModel>>> GetAllPagedAsync(int page, int perPage);
+        Task<ApiResponse<IEnumerable<TViewModel>>> GetAllByPageNested(int page, int perPage);
     }
 }
