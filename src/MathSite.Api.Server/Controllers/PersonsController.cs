@@ -51,14 +51,14 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpPost(MethodNames.Global.Create)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Create)]
-        public Task<ApiResponse<Guid>> CreateAsync(PersonDto viewModel)
+        public Task<ApiResponse<Guid>> CreateAsync([FromBody]PersonDto viewModel)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.CreateAsync(viewModel, ViewModelToEntityAsync));
         }
 
         [HttpPut(MethodNames.Global.Update)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Update)]
-        public Task<ApiResponse<Guid>> UpdateAsync(PersonDto viewModel)
+        public Task<ApiResponse<Guid>> UpdateAsync([FromBody]PersonDto viewModel)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.UpdateAsync(viewModel, ViewModelToEntityAsync));
         }
@@ -70,11 +70,34 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
         }
 
+        [HttpDelete("delete-many")]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
+        public Task<ApiResponse<int>> DeleteManyAsync([FromBody] List<Guid> ids)
+        {
+            return ExecuteSafely(() =>
+            {
+                return Context.Persons.Where(x => ids.Contains(x.Id)).DeleteFromQueryAsync();
+            });
+        }
         [HttpGet(MethodNames.Global.GetPaged)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
         public Task<ApiResponse<IEnumerable<PersonDto>>> GetAllPagedAsync(int page, int perPage)
         {
             return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
+        }
+
+        [HttpGet("get-all-by-page-nested")]
+        [AuthorizeMethod(ServiceName, "get-all-by-page-nested")]
+        public Task<ApiResponse<IEnumerable<PersonDto>>> GetAllByPageNested(int page, int perPage)
+        {
+            return ExecuteSafely(async () =>
+            {
+                page = page >= 1 ? page : 0;
+                perPage = perPage > 0 ? perPage : 0;
+
+                var persons = await Repository.Include(u => u.User).Include(u=>u.Professor).Skip(page * perPage).Take(perPage).Select(u => Mapper.Map<PersonDto>(u)).ToArrayAsync();
+                return (IEnumerable<PersonDto>)persons;
+            });
         }
 
         [HttpGet(MethodNames.Global.GetCount)]
