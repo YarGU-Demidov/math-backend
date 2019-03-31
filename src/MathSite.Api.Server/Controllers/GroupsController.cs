@@ -73,13 +73,15 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
         }
 
-        [HttpPost(MethodNames.Global.GetPaged)]
-        [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
+        [HttpGet("get-all-by-page-nested")]
+        [AuthorizeMethod(ServiceName, "get-all-by-page-nested")]
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetAllPagedAsync(int page, int perPage)
         {
             return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
         }
-
+        
+        [HttpPost(MethodNames.Global.GetPaged)]
+        [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetAllByPageNested(int page, int perPage)
         {
             return ExecuteSafely(async () =>
