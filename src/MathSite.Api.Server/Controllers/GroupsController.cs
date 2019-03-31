@@ -82,7 +82,18 @@ namespace MathSite.Api.Server.Controllers
 
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetAllByPageNested(int page, int perPage)
         {
-            throw new NotImplementedException();
+            return ExecuteSafely(async () =>
+            {
+                page = page >= 1 ? page : 0;
+                perPage = perPage > 0 ? perPage : 0;
+
+                var groups = await Repository.Include(g=>g.GroupsRights)
+                    .Skip(page * perPage)
+                    .Take(perPage)
+                    .Select(u => Mapper.Map<GroupDto>(u))
+                    .ToArrayAsync();
+                return (IEnumerable<GroupDto>)groups;
+            });
         }
 
         [HttpPost(MethodNames.Global.GetCount)]
