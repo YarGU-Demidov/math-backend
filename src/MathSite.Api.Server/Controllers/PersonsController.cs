@@ -51,14 +51,14 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpPost(MethodNames.Global.Create)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Create)]
-        public Task<ApiResponse<Guid>> CreateAsync(PersonDto viewModel)
+        public Task<ApiResponse<Guid>> CreateAsync([FromBody]PersonDto viewModel)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.CreateAsync(viewModel, ViewModelToEntityAsync));
         }
 
         [HttpPut(MethodNames.Global.Update)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Update)]
-        public Task<ApiResponse<Guid>> UpdateAsync(PersonDto viewModel)
+        public Task<ApiResponse<Guid>> UpdateAsync([FromBody]PersonDto viewModel)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.UpdateAsync(viewModel, ViewModelToEntityAsync));
         }
@@ -70,6 +70,15 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
         }
 
+        [HttpDelete("delete-many")]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
+        public Task<ApiResponse<int>> DeleteManyAsync([FromBody] List<Guid> ids)
+        {
+            return ExecuteSafely(() =>
+            {
+                return Context.Persons.Where(x => ids.Contains(x.Id)).DeleteFromQueryAsync();
+            });
+        }
         [HttpGet(MethodNames.Global.GetPaged)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
         public Task<ApiResponse<IEnumerable<PersonDto>>> GetAllPagedAsync(int page, int perPage)
