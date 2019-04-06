@@ -24,7 +24,7 @@ namespace MathSite.Api.Server.Controllers
     [V1]
     [DefaultApiRoute(ServiceNames.Persons)]
     [ApiController]
-    public class PersonsController : EntityApiControllerBase<Person>, IPersonService
+    public class PersonsController : EntityApiControllerBase<Person>, IPersonsService
     {
         private const string ServiceName = ServiceNames.Persons;
         private readonly CrudServiceMethods<Person, PersonDto> _crudServiceMethods;
@@ -76,9 +76,10 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(() =>
             {
-                return Context.Persons.Where(x => ids.Contains(x.Id)).DeleteFromQueryAsync();
+                return Repository.Where(x => ids.Contains(x.Id)).DeleteFromQueryAsync();
             });
         }
+
         [HttpGet(MethodNames.Global.GetPaged)]
         [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
         public Task<ApiResponse<IEnumerable<PersonDto>>> GetAllPagedAsync(int page, int perPage)
@@ -95,7 +96,13 @@ namespace MathSite.Api.Server.Controllers
                 page = page >= 1 ? page : 0;
                 perPage = perPage > 0 ? perPage : 0;
 
-                var persons = await Repository.Include(u => u.User).Include(u=>u.Professor).Skip(page * perPage).Take(perPage).Select(u => Mapper.Map<PersonDto>(u)).ToArrayAsync();
+                var persons = await Repository
+                    .Include(u => u.User)
+                    .Include(u=>u.Professor)
+                    .Skip(page * perPage)
+                    .Take(perPage)
+                    .Select(u => Mapper.Map<PersonDto>(u))
+                    .ToArrayAsync();
                 return (IEnumerable<PersonDto>)persons;
             });
         }
@@ -124,7 +131,11 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
-                var persons = await Repository.Include(p=>p.User).Where(p => p.User == null).Select(p => Mapper.Map<PersonDto>(p)).ToArrayAsync();
+                var persons = await Repository
+                    .Include(p=>p.User)
+                    .Where(p => p.User == null)
+                    .Select(p => Mapper.Map<PersonDto>(p))
+                    .ToArrayAsync();
                 return (IEnumerable<PersonDto>)persons;
             });
         }
@@ -135,7 +146,10 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
-                var persons = await Repository.Where(p => p.Surname.ToLower().Contains(surname.ToLower())).Select(p=>Mapper.Map<PersonDto>(p)).ToArrayAsync();
+                var persons = await Repository
+                    .Where(p => p.Surname.ToLower().Contains(surname.ToLower()))
+                    .Select(p=>Mapper.Map<PersonDto>(p))
+                    .ToArrayAsync();
                 return (IEnumerable<PersonDto>)persons;
             });
         }
@@ -146,7 +160,11 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
-                var persons = await Repository.Include(p=>p.User).Where(p => p.Surname.ToLower().Contains(surname.ToLower()) && p.User==null).Select(p => Mapper.Map<PersonDto>(p)).ToArrayAsync();
+                var persons = await Repository
+                    .Include(p=>p.User)
+                    .Where(p => p.Surname.ToLower().Contains(surname.ToLower()) && p.User==null)
+                    .Select(p => Mapper.Map<PersonDto>(p))
+                    .ToArrayAsync();
                 return (IEnumerable<PersonDto>)persons;
             });
         }
@@ -157,7 +175,26 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
-                var persons = await Repository.Include(p => p.Professor).Where(p => p.Professor == null).Select(p => Mapper.Map<PersonDto>(p)).ToArrayAsync();
+                var persons = await Repository
+                    .Include(p => p.Professor)
+                    .Where(p => p.Professor == null)
+                    .Select(p => Mapper.Map<PersonDto>(p))
+                    .ToArrayAsync();
+                return (IEnumerable<PersonDto>)persons;
+            });
+        }
+
+        [HttpGet("get-all-by-surname-without-professors")]
+        [AuthorizeMethod(ServiceName, "get-all-by-surname-without-professors")]
+        public Task<ApiResponse<IEnumerable<PersonDto>>> GetBySurnameWithoutProfessorsAsync(string surname)
+        {
+            return ExecuteSafely(async () =>
+            {
+                var persons = await Repository
+                    .Include(p => p.Professor)
+                    .Where(p => p.Surname.ToLower().Contains(surname.ToLower()) && p.Professor == null)
+                    .Select(p => Mapper.Map<PersonDto>(p))
+                    .ToArrayAsync();
                 return (IEnumerable<PersonDto>)persons;
             });
         }

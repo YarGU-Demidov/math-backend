@@ -27,7 +27,7 @@ namespace MathSite.Api.Server.Controllers
     [V1]
     [DefaultApiRoute(ServiceNames.Users)]
     [ApiController]
-    public class UsersController : EntityApiControllerBase<User>, IUserService
+    public class UsersController : EntityApiControllerBase<User>, IUsersService
     {
         private const string ServiceName = ServiceNames.Users;
         private readonly IPasswordsManager _passwordsManager;
@@ -105,7 +105,13 @@ namespace MathSite.Api.Server.Controllers
                 page = page >= 1 ? page : 0;
                 perPage = perPage > 0 ? perPage : 0;
 
-                var user = await Repository.Include(u => u.Person).Include(u=>u.Group).Skip(page * perPage).Take(perPage).Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
+                var user = await Repository
+                    .Include(u => u.Person)
+                    .Include(u=>u.Group)
+                    .Skip(page * perPage)
+                    .Take(perPage)
+                    .Select(u => Mapper.Map<UserDto>(u))
+                    .ToArrayAsync();
                 return (IEnumerable<UserDto>)user;
             });
         }
@@ -118,15 +124,10 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpGet(MethodNames.Users.GetAll)]
         [AuthorizeMethod(ServiceName, MethodNames.Users.GetAll)]
-        public Task<ApiResponse<IEnumerable<UserDto>>> GetAllAsync(bool withPerson = false)
+        public Task<ApiResponse<IEnumerable<UserDto>>> GetAllAsync()
         {
             return  ExecuteSafely(async () =>
             {
-                if (withPerson)
-                {
-                    var user = await Repository.Include(u=>u.Person).Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
-                    return (IEnumerable<UserDto>)user;
-                }
                 var users = await Repository.Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
                 return (IEnumerable<UserDto>)users;
             });
@@ -138,7 +139,12 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
-                var users = await Repository.Include(u=> u.Person).Include(u=>u.Group).Where(u=>u.Login == login).Select(u => Mapper.Map<UserDto>(u)).ToArrayAsync();
+                var users = await Repository
+                    .Include(u=> u.Person)
+                    .Include(u=>u.Group)
+                    .Where(u=>u.Login == login)
+                    .Select(u => Mapper.Map<UserDto>(u))
+                    .ToArrayAsync();
                 return (IEnumerable<UserDto>)users;
             });
         }
