@@ -45,9 +45,24 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpGet(MethodNames.Global.GetOne)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.GetOne)]
-        public Task<ApiResponse<ProfessorDto>> GetById(Guid id)
+        public Task<ApiResponse<ProfessorDto>> GetById([FromQuery] Guid id)
         {
             return ExecuteSafely(async () => await _crudServiceMethods.GetById(id));
+        }
+
+        [HttpGet("get-by-id-with-person")]
+        [AuthorizeMethod(ServiceName, "get-by-id-with-person")]
+        public Task<ApiResponse<ProfessorDto>> GetByIdWithPersonAsync([FromQuery] Guid id)
+        {
+            return ExecuteSafely(async () =>
+            {
+                var professor = await Repository
+                    .Include(p=>p.Person)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+                var professorDto =  Mapper.Map<ProfessorDto>(professor);
+                professorDto.Person.Professor = null;
+                return professorDto;
+            });
         }
 
         [HttpPost(MethodNames.Global.Create)]
