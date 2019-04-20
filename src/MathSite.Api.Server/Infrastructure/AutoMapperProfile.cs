@@ -15,6 +15,9 @@ namespace MathSite.Api.Server.Infrastructure
         {
             CreateMap<User, UserDto>();
             CreateMap<UserDto, User>();
+
+            CreateMap<Professor, ProfessorDto>();
+            CreateMap<ProfessorDto, Professor>();
         }
     }
 }
