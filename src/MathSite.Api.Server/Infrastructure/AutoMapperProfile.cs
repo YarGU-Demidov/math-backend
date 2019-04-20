@@ -13,8 +13,11 @@ namespace MathSite.Api.Server.Infrastructure
 
         private void BuildMaps()
         {
-            CreateMap<User, ProfessorDto>();
-            CreateMap<ProfessorDto, User>();
+            CreateMap<User, UserDto>();
+            CreateMap<UserDto, User>();
+
+            CreateMap<Professor, ProfessorDto>();
+            CreateMap<ProfessorDto, Professor>();
         }
     }
 }
