@@ -7,7 +7,7 @@ using MathSite.Api.Server.Infrastructure.ServicesInterfaces.Common;
 
 namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1
 {
-    public interface IPersonsService: ICrudService<PersonDto>, IPageableService<PersonDto>
+    public interface IPersonsService: ICrudService<PersonDto>, IPageableService<PersonDto>, ICountableService
     {
         Task<ApiResponse<IEnumerable<PersonDto>>> GetAllAsync();
         Task<ApiResponse<IEnumerable<PersonDto>>> GetBySurnameAsync(string surname);
