@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MathSite.Api.Core;
 
@@ -17,5 +18,6 @@ namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.Common
         Task<ApiResponse<TPrimaryKey>> CreateAsync(TViewModel viewModel);
         Task<ApiResponse<TPrimaryKey>> UpdateAsync(TViewModel viewModel);
         Task<ApiResponse> DeleteAsync(TPrimaryKey id);
+        Task<ApiResponse<int>> DeleteManyAsync(List<TPrimaryKey> ids);
     }
 }

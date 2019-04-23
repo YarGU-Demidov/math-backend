@@ -14,6 +14,5 @@ namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1
         Task<ApiResponse<UserDto>> GetByLoginAndPasswordAsync(string login, string password);
         Task<ApiResponse<bool>> HasRightAsync(Guid userId, string rightAlias);
         Task<ApiResponse<bool>> HasCurrentUserRightAsync(string rightAlias);
-        Task<ApiResponse<int>> DeleteManyAsync(List<Guid> ids);
     }
 }

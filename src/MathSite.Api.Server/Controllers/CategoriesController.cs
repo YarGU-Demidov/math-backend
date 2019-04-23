@@ -47,7 +47,7 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpPost(MethodNames.Global.Create)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Create)]
-        public Task<ApiResponse<Guid>> CreateAsync(CategoryDto viewModel)
+        public Task<ApiResponse<Guid>> CreateAsync([FromBody]CategoryDto viewModel)
         {
             return ExecuteSafely(() => _crudServiceMethods.CreateAsync(viewModel, ViewModelToEntityAsync));
         }
@@ -57,6 +57,16 @@ namespace MathSite.Api.Server.Controllers
         public Task<ApiResponse> DeleteAsync(Guid id)
         {
             return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
+        }
+
+        [HttpDelete("delete-many")]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
+        public Task<ApiResponse<int>> DeleteManyAsync([FromBody]List<Guid> ids)
+        {
+            return ExecuteSafely(() =>
+            {
+                return Repository.Where(x => ids.Contains(x.Id)).DeleteFromQueryAsync();
+            });
         }
 
         [HttpGet("get-all-by-page-nested")]
@@ -115,7 +125,7 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpPut(MethodNames.Global.Update)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Update)]
-        public Task<ApiResponse<Guid>> UpdateAsync(CategoryDto viewModel)
+        public Task<ApiResponse<Guid>> UpdateAsync([FromBody]CategoryDto viewModel)
         {
             return ExecuteSafely(() => _crudServiceMethods.UpdateAsync(viewModel, ViewModelToEntityAsync));
         }
