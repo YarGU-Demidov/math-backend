@@ -85,7 +85,7 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(() =>
             {
-                return Context.Users.Where(x => ids.Contains(x.Id)).DeleteFromQueryAsync();
+                return Repository.Where(x => ids.Contains(x.Id)).DeleteFromQueryAsync();
             });
         }
 

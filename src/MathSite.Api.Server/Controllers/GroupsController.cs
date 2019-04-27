@@ -73,15 +73,15 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(() => _crudServiceMethods.DeleteAsync(id));
         }
 
-        [HttpGet("get-all-by-page-nested")]
-        [AuthorizeMethod(ServiceName, "get-all-by-page-nested")]
+        [HttpPost(MethodNames.Global.GetPaged)]
+        [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetAllPagedAsync(int page, int perPage)
         {
             return ExecuteSafely(() => _pageableServiceMethods.GetAllPagedAsync(page, perPage));
         }
-        
-        [HttpPost(MethodNames.Global.GetPaged)]
-        [AuthorizeMethod(ServiceName, MethodNames.Global.GetPaged)]
+
+        [HttpGet("get-all-by-page-nested")]
+        [AuthorizeMethod(ServiceName, "get-all-by-page-nested")]
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetAllByPageNested(int page, int perPage)
         {
             return ExecuteSafely(async () =>
@@ -89,7 +89,8 @@ namespace MathSite.Api.Server.Controllers
                 page = page >= 1 ? page : 0;
                 perPage = perPage > 0 ? perPage : 0;
 
-                var groups = await Repository.Include(g=>g.GroupsRights)
+                var groups = await Repository
+                    .Include(g=>g.GroupsRights)
                     .Skip(page * perPage)
                     .Take(perPage)
                     .Select(u => Mapper.Map<GroupDto>(u))
@@ -147,7 +148,24 @@ namespace MathSite.Api.Server.Controllers
         [AuthorizeMethod(ServiceName, MethodNames.Groups.GetGroupsByType)]
         public Task<ApiResponse<IEnumerable<GroupDto>>> GetGroupsByTypeAsync(string groupTypeAlias)
         {
-            throw new NotImplementedException();
+            return ExecuteSafely(async () =>
+            {
+                var persons = await Repository
+                    .Where(g => g.Alias.ToLower().Contains(groupTypeAlias.ToLower()))
+                    .Select(p => Mapper.Map<GroupDto>(p))
+                    .ToArrayAsync();
+                return (IEnumerable<GroupDto>)persons;
+            });
+        }
+
+        [HttpDelete("delete-many")]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
+        public Task<ApiResponse<int>> DeleteManyAsync([FromBody]List<Guid> ids)
+        {
+            return ExecuteSafely(() =>
+            {
+                return Repository.Where(x => ids.Contains(x.Id)).DeleteFromQueryAsync();
+            });
         }
 
         [HttpGet(MethodNames.Global.GetByAlias)]
@@ -156,9 +174,13 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
-                var persons = await Repository.Where(p => p.Alias.ToLower().Contains(alias.ToLower())).Select(p => Mapper.Map<GroupDto>(p)).ToArrayAsync();
+                var persons = await Repository
+                    .Where(p => p.Alias.ToLower().Contains(alias.ToLower()))
+                    .Select(p => Mapper.Map<GroupDto>(p))
+                    .ToArrayAsync();
                 return (IEnumerable<GroupDto>)persons;
             });
         }
+
     }
 }

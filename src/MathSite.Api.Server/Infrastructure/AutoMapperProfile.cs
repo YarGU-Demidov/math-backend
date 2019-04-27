@@ -18,6 +18,12 @@ namespace MathSite.Api.Server.Infrastructure
 
             CreateMap<Professor, ProfessorDto>();
             CreateMap<ProfessorDto, Professor>();
+
+            CreateMap<Category, CategoryDto>();
+            CreateMap<CategoryDto, Category>();
+
+            CreateMap<Group, GroupDto>();
+            CreateMap<GroupDto, Group>();
         }
     }
 }

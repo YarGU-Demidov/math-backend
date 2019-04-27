@@ -7,7 +7,7 @@ using MathSite.Api.Server.Infrastructure.ServicesInterfaces.Common;
 
 namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1
 {
-    public interface IGroupsService : ICrudService<GroupDto>, IAliasedService<GroupDto>, IPageableService<GroupDto>
+    public interface IGroupsService : ICrudService<GroupDto>, IAliasedService<GroupDto>, IPageableService<GroupDto>, ICountableService
     {
         Task<ApiResponse<IEnumerable<GroupDto>>> GetAllAsync();
         Task<ApiResponse<bool>> HasRightAsync(Guid groupId, string rightAlias);
