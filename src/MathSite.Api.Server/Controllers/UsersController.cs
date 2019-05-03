@@ -53,7 +53,7 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpGet(MethodNames.Global.GetOne)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.GetOne)]
-        public Task<ApiResponse<UserDto>> GetById(Guid id)
+        public Task<ApiResponse<UserDto>> GetById([FromQuery]Guid id)
         {
             return ExecuteSafely(() => _crudServiceMethods.GetById(id));
         }
