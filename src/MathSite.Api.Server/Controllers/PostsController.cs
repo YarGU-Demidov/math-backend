@@ -131,12 +131,12 @@ namespace MathSite.Api.Server.Controllers
             {
                 var posts = GetCommonFilteredPosts(pagesCountArgs);
 
-                if (pagesCountArgs.PostType.Alias.IsNotNull())
+                if (pagesCountArgs.PostType.IsNotNull() && pagesCountArgs.PostType.Id != Guid.Empty)
                 {
-                    posts = posts.Where(p => p.PostType.Alias == pagesCountArgs.PostType.Alias);
+                    posts = posts.Where(p => p.PostType.Id == pagesCountArgs.PostType.Id);
                 }
             
-                if (pagesCountArgs.Category.Id != Guid.Empty)
+                if (pagesCountArgs.Category.IsNotNull() && pagesCountArgs.Category.Id != Guid.Empty)
                 {
                     posts = posts.Where(p => p.PostCategories.Any(c => c.CategoryId == pagesCountArgs.Category.Id));
                 }
