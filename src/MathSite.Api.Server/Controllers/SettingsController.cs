@@ -142,6 +142,21 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
+        [HttpPost("set-site-settings")]
+        [AuthorizeMethod(ServiceName, "set-site-settings")]
+        public Task<ApiResponse<bool>> SetSiteSettings([FromBody] SiteSettings settings)
+        {
+            return ExecuteSafely(async () => {
+                var userId = await Services.Auth.GetCurrentUserIdAsync();
+                var result = await SetStringSettingAsync(userId, SiteSettingsNames.DefaultHomePageTitle, settings.DefaultTitleForHomePage);
+                result = result? await SetStringSettingAsync(userId, SiteSettingsNames.DefaultNewsPageTitle, settings.DefaultTitleForNewsPage) : result;
+                result = result? await SetStringSettingAsync(userId, SiteSettingsNames.PerPage, settings.PerPageCount.ToString()) : result;
+                result = result? await SetStringSettingAsync(userId, SiteSettingsNames.SiteName, settings.SiteName) : result;
+                result = result? await SetStringSettingAsync(userId, SiteSettingsNames.TitleDelimiter, settings.TitleDelimiter) : result;
+                return result;
+            });
+        }
+
         private async Task<string> GetStringSettingAsync(string name)
         {
             var settingValue = await GetValueForKey(setting => setting.Key == name);
