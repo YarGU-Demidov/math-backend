@@ -182,14 +182,14 @@ namespace MathSite.Api.Server.Controllers
             {
                 var excludedCategories = postsArgs.ExcludedCategories as CategoryDto[] ?? postsArgs.ExcludedCategories?.ToArray();
 
-                var page = postsArgs.Page >= 1 ? postsArgs.Page : 0;//TODO ???
+                var page = postsArgs.Page >= 1 ? postsArgs.Page : 0;
                 var perPage = postsArgs.PerPage > 0 ? postsArgs.PerPage : 0;
 
                 var posts = GetCommonFilteredPosts(postsArgs);
 
-                if (postsArgs.PostType.Alias.IsNotNull())
+                if (postsArgs.PostType.IsNotNull() && postsArgs.PostType.Id != Guid.Empty)
                 {
-                    posts = posts.Where(p => p.PostType.Alias == postsArgs.PostType.Alias);
+                    posts = posts.Where(p => p.PostType.Id == postsArgs.PostType.Id);
                 }
 
                 if (postsArgs.CategoryId.HasValue)
