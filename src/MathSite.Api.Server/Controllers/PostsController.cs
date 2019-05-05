@@ -99,8 +99,8 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
-                page = page >= 1 ? page : 0;
-                perPage = perPage > 0 ? perPage : 0;
+                page = page >= 1 ? page : 1;
+                perPage = perPage > 0 ? perPage : 1;
 
                 var posts = await Repository
                     .Include(p => p.PostType)
@@ -114,7 +114,7 @@ namespace MathSite.Api.Server.Controllers
                     .Include(p => p.PostRatings)
                     .Include(p => p.PostSeoSetting)
                     .Include(p => p.PostSettings)
-                    .Skip(page * perPage)
+                    .Skip((page - 1) * perPage)
                     .Take(perPage)
                     .Select(u => Mapper.Map<PostDto>(u))
                     .ToArrayAsync();
@@ -135,13 +135,13 @@ namespace MathSite.Api.Server.Controllers
                 {
                     posts = posts.Where(p => p.PostType.Id == pagesCountArgs.PostType.Id);
                 }
-            
+
                 if (pagesCountArgs.Category.IsNotNull() && pagesCountArgs.Category.Id != Guid.Empty)
                 {
                     posts = posts.Where(p => p.PostCategories.Any(c => c.CategoryId == pagesCountArgs.Category.Id));
                 }
-
-                return await posts.CountAsync();
+                var postsCount = await posts.CountAsync();
+                return (int)Math.Ceiling(postsCount / (float)pagesCountArgs.PerPage);
             });
         }
 
@@ -151,7 +151,7 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
-                if (postType.Alias.IsNullOrWhiteSpace())
+                if (postType.IsNull() || postType.Id == Guid.Empty)
                 {
                     throw new EntityNotFoundException(ExceptionsDescriptions.EntityNotFound);
                 }
@@ -164,12 +164,12 @@ namespace MathSite.Api.Server.Controllers
                 var isGuest = currentUserId == Guid.Empty || (await Services.Users.GetById(currentUserId)).IsNull();
 
                 var hasRightToViewRemovedAndUnpublished
-                    = !isGuest && await Services.Users.HasRightAsync(currentUserId,RightAliases.ManageNewsAccess);
+                    = !isGuest && await Services.Users.HasRightAsync(currentUserId, RightAliases.ManageNewsAccess);
 
                 if (!hasRightToViewRemovedAndUnpublished)
                     posts = posts.Where(p => p.Published & !p.Deleted);
 
-                var post = await posts.FirstOrDefaultAsync(p => p.PostType.Alias == postType.Alias);
+                var post = await posts.FirstOrDefaultAsync(p => p.PostType.Id == postType.Id);
                 return Mapper.Map<PostDto>(post);
             });
         }
@@ -182,8 +182,8 @@ namespace MathSite.Api.Server.Controllers
             {
                 var excludedCategories = postsArgs.ExcludedCategories as CategoryDto[] ?? postsArgs.ExcludedCategories?.ToArray();
 
-                var page = postsArgs.Page >= 1 ? postsArgs.Page : 0;
-                var perPage = postsArgs.PerPage > 0 ? postsArgs.PerPage : 0;
+                var page = postsArgs.Page >= 1 ? postsArgs.Page : 1;
+                var perPage = postsArgs.PerPage > 0 ? postsArgs.PerPage : 1;
 
                 var posts = GetCommonFilteredPosts(postsArgs);
 
@@ -203,7 +203,7 @@ namespace MathSite.Api.Server.Controllers
                 }
 
                 return (IEnumerable<PostDto>)await posts.OrderBy(post => postsArgs.SortByPublish ? post.PublishDate : post.CreationDate, false)
-                     .Skip(page * perPage).Take(perPage)
+                     .Skip((page - 1) * perPage).Take(perPage)
                      .Select(p => Mapper.Map<PostDto>(p)).ToArrayAsync();
             });
         }
@@ -230,19 +230,23 @@ namespace MathSite.Api.Server.Controllers
             var posts = Repository
                 .Include(p => p.PostSeoSetting)
                 .Include(p => p.PostType)
+                .Include(p => p.PostCategories)
                 .Include(p => p.PostSettings).AsQueryable();
 
-            posts =postArgs.ItemAvailableStatus == ItemAvailableStatus.Removed
-                ? posts.Where(p => p.Deleted)
-                : posts.Where(p => !p.Deleted);
+            if (postArgs.ItemAvailableStatus == ItemAvailableStatus.Removed)
+                posts = posts.Where(p => p.Deleted);
+            else if (postArgs.ItemAvailableStatus == ItemAvailableStatus.Alive)
+                posts = posts.Where(p => !p.Deleted);
 
-            posts =postArgs.PublishStatus == PublishStatus.Published
-                ? posts.Where(p => p.Published)
-                : posts.Where(p => !p.Published);
+            if (postArgs.PublishStatus == PublishStatus.Published)
+                posts = posts.Where(p => p.Published);
+            else if (postArgs.PublishStatus == PublishStatus.Unpubished)
+                posts = posts.Where(p => !p.Published);
 
-            posts =postArgs.FrontPageStatus == FrontPageStatus.Visible
-                ? posts.Where(p => p.PostSettings.PostOnStartPage)
-                : posts.Where(p => !p.PostSettings.PostOnStartPage);
+            if (postArgs.FrontPageStatus == FrontPageStatus.Visible)
+                posts = posts.Where(p => p.PostSettings.PostOnStartPage);
+            else if (postArgs.FrontPageStatus == FrontPageStatus.Invisible)
+                posts = posts.Where(p => !p.PostSettings.PostOnStartPage);
 
             return posts;
         }
