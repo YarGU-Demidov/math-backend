@@ -202,7 +202,7 @@ namespace MathSite.Api.Server.Controllers
                     posts = posts.Where(p => excludedCategories.All(c => c.Id != p.Id));
                 }
 
-                return (IEnumerable<PostDto>)await posts
+                return (IEnumerable<PostDto>)await posts.OrderBy(post => postsArgs.SortByPublish ? post.PublishDate : post.CreationDate, false)
                      .Skip(page * perPage).Take(perPage)
                      .Select(p => Mapper.Map<PostDto>(p)).ToArrayAsync();
             });
