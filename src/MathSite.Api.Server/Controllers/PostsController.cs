@@ -158,6 +158,7 @@ namespace MathSite.Api.Server.Controllers
 
                 var posts = Repository
                     .Include(p => p.PostType)
+                    .Include(p => p.PostSeoSetting)
                     .Include(p => p.PostSettings).AsQueryable();
 
                 var currentUserId = await Services.Auth.GetCurrentUserIdAsync();
@@ -169,7 +170,7 @@ namespace MathSite.Api.Server.Controllers
                 if (!hasRightToViewRemovedAndUnpublished)
                     posts = posts.Where(p => p.Published & !p.Deleted);
 
-                var post = await posts.FirstOrDefaultAsync(p => p.PostType.Id == postType.Id);
+                var post = await posts.FirstOrDefaultAsync(p => p.PostType.Id == postType.Id && p.PostSeoSetting.Url == url);
                 return Mapper.Map<PostDto>(post);
             });
         }
