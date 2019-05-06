@@ -192,7 +192,7 @@ namespace MathSite.Api.Server.Controllers
                 else if (isGuest)
                 {
                     Services.Groups.ShouldRaiseException = false;
-                    var guestsGroup = await Services.Groups.GetByAliasAsync(GroupAliases.Guest);
+                    var guestsGroup = Context.Groups.FirstOrDefault(g => g.Alias == GroupAliases.Guest);
 
                     if (guestsGroup.IsNull())
                         throw new MissingMemberException(ExceptionsDescriptions.GuestsGroupNotFound);

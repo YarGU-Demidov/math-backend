@@ -27,6 +27,9 @@ namespace MathSite.Api.Server.Infrastructure
 
             CreateMap<Directory, DirectoryDto>();
             CreateMap<DirectoryDto, Directory>();
+
+            CreateMap<File, FileDto>();
+            CreateMap<FileDto, File>();
         }
     }
 }
