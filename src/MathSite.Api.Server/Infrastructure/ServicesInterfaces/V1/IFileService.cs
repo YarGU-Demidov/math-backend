@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1
 {
-    interface IFileService
+    interface IFileService: ICrudService<FileDto>
     {
         Task<ApiResponse<IEnumerable<FileDto>>> GetByDirectoryId(Guid directoryId);
       //  Task<ApiResponse<IEnumerable<Guid>>> UploadFile(List<IFormFile> file);

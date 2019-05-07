@@ -17,6 +17,7 @@ using MathSite.Api.Server.Infrastructure.Attributes.VersionsAttributes;
 using MathSite.Api.Server.Infrastructure.CommonServiceMethods;
 using MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1;
 using MathSite.Api.Services.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,17 +31,40 @@ namespace MathSite.Api.Server.Controllers
     {
         private const string ServiceName = ServiceNames.Directories;
         private IFileFacade _fileFacade;
+        private readonly CrudServiceMethods<Entities.File, FileDto> _crudServiceMethods;
 
         public FilesController(
             IFileFacade fileFacade,
             MathSiteDbContext context,
             MathServices services,
-            IMapper mapper
+            IMapper mapper,
+            CrudServiceMethods<Entities.File, FileDto> crudServiceMethods
         ) : base(context, services, mapper)
         {
             _fileFacade = fileFacade;
+            _crudServiceMethods = crudServiceMethods;
         }
-        
+
+        [HttpPost(MethodNames.Global.Create)]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Create)]
+        public Task<ApiResponse<Guid>> CreateAsync([FromBody]FileDto viewModel)
+        {
+            return ExecuteSafely(() => _crudServiceMethods.CreateAsync(viewModel, ViewModelToEntityAsync));
+        }
+
+
+        [HttpDelete(MethodNames.Global.Delete)]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Global.Delete)]
+        public Task<ApiResponse> DeleteAsync(Guid id)
+        {
+            return ExecuteSafely(async() => await _fileFacade.Remove(id));
+        }
+
+        public Task<ApiResponse<int>> DeleteManyAsync(List<Guid> ids)
+        {
+            throw new NotImplementedException();
+        }
+
         [HttpGet("get-by-directory-id")]
         [AuthorizeMethod(ServiceName, "get-by-directory-id")]
         public Task<ApiResponse<IEnumerable<FileDto>>> GetByDirectoryId(Guid directoryId)
@@ -48,12 +72,18 @@ namespace MathSite.Api.Server.Controllers
             return ExecuteSafely(async () =>
             {
                 var directories = await Repository
-                .Where(f=> f.DirectoryId == directoryId)
+                .Where(f => f.DirectoryId == directoryId)
                 .Select(f => Mapper.Map<FileDto>(f))
                 .ToArrayAsync();
                 return (IEnumerable<FileDto>)directories;
             });
         }
+
+        public Task<ApiResponse<FileDto>> GetById(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
         [HttpGet("get-root-files")]
         [AuthorizeMethod(ServiceName, "get-root-files")]
         public Task<ApiResponse<IEnumerable<FileDto>>> GetRootFiles()
@@ -68,8 +98,14 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
+        public Task<ApiResponse<Guid>> UpdateAsync(FileDto viewModel)
+        {
+            throw new NotImplementedException();
+        }
+
         [HttpPost("upload-file")]
         [AuthorizeMethod(ServiceName, "upload-file")]
+        [Authorize(Roles = "admin")]
         public Task<ApiResponse<Guid>> UploadFile(Guid directoryId)
         {
             return ExecuteSafely(async () =>
@@ -79,15 +115,21 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
-        private static string GetFileHashString(Stream data)
+        protected async Task<Entities.File> ViewModelToEntityAsync(FileDto viewModel, ActionType actionType)
         {
-            byte[] hash;
-            using (var sha = new SHA512Managed())
+            Entities.File file;
+            if (actionType == ActionType.Create)
             {
-                hash = sha.ComputeHash(data);
+                file = new Entities.File();
+                Mapper.Map(viewModel, file);
+            }
+            else
+            {
+                file = await Repository.FirstOrDefaultAsync(f => f.Id == viewModel.Id);
+                Mapper.Map(viewModel, file);
             }
 
-            return hash.Select(b => b.ToString("X2")).Aggregate((f, s) => $"{f}{s}");
+            return file;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MathSite.Api.Common.Exceptions;
 using MathSite.Api.Common.FileStorage;
 using MathSite.Api.Db;
 using MathSite.Api.Dto;
@@ -19,10 +20,11 @@ namespace MathSite.Api.Server.Infrastructure
 {
     public class FileFacade : IFileFacade
     {
-        protected MathSiteDbContext Context { get; }
-        protected MathServices Services { get; }
-        protected DbSet<File> Repository { get; }
+        private MathSiteDbContext Context { get; }
+        private MathServices Services { get; }
+        private DbSet<File> Repository { get; }
         private readonly IFileStorage _fileStorage;
+        private IMapper Mapper { get; }
 
         public FileFacade(
             MathSiteDbContext context,
@@ -35,12 +37,14 @@ namespace MathSite.Api.Server.Infrastructure
             Services = services;
             Repository = context.Set<File>();
             _fileStorage = fileStorage;
+            Mapper = mapper;
         }
         public async Task<Guid> SaveFileAsync(string name, Stream data, Guid dirId)
         {
-            var hasRight = await Services.Users.HasCurrentUserRightAsync("admin");
-            if (!hasRight)
-                throw new AuthenticationException("You must be authenticated and authorized for this action!");
+            // Removed for time it works
+            //var hasRight = await Services.Users.HasCurrentUserRightAsync("admin");
+            //if (!hasRight)
+            //    throw new AuthenticationException("You must be authenticated and authorized for this action!");
 
             var hash = GetFileHashString(data);
 
@@ -67,9 +71,31 @@ namespace MathSite.Api.Server.Infrastructure
                         ? dirId
                         : null as Guid?
                 };
+                var entry = await Repository.AddAsync(file);
+                await Context.SaveChangesAsync();
 
-                return await Services.Files.CreateAsync(Mapper.Map<FileDto>(file));
+                return entry.Entity.Id;
             }
+        }
+        public async Task Remove(Guid id)
+        {
+            var file = await Repository
+                .Include(f=>f.Person)
+                .Include(f=>f.PostAttachments)
+                .Include(f=>f.PostSettings)
+                .FirstOrDefaultAsync(f=>f.Id==id);
+
+            if (file.Person != null || file.PostAttachments.Count != 0 || file.PostSettings.Count != 0)
+            {
+                throw new FileIsUsedException();
+            }
+
+            var deleteFileTask = await Repository.CountAsync(f => f.Path == file.Path) <= 1
+                ? _fileStorage.Remove(file.Path)
+                : Task.CompletedTask;
+            var entity = await Repository.FirstOrDefaultAsync(f2=>f2.Path == file.Path);
+            Repository.Remove(entity);
+            await Context.SaveChangesAsync();
         }
         private static string GetFileName(string currentName, File file)
         {
