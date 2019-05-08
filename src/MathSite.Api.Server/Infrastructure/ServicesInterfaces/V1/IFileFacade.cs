@@ -19,7 +19,7 @@ namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1
 
         //Task<IEnumerable<File>> GetFilesByExtensions(IEnumerable<string> extensions);
 
-        //Task<(string FileName, Stream FileStream, string Extension)> GetFileAsync(Guid id);
+        Task<(string FileName, Stream FileStream, string Extension)> GetFileAsync(Guid id);
         Task Remove(Guid id);
     }
 }

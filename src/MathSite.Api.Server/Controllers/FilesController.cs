@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using AutoMapper;
 using MathSite.Api.Common.Attributes;
+using MathSite.Api.Common.FileFormats;
 using MathSite.Api.Core;
 using MathSite.Api.Db;
 using MathSite.Api.Dto;
@@ -32,6 +33,7 @@ namespace MathSite.Api.Server.Controllers
         private const string ServiceName = ServiceNames.Directories;
         private IFileFacade _fileFacade;
         private readonly CrudServiceMethods<Entities.File, FileDto> _crudServiceMethods;
+        private readonly FileFormatBuilder _fileFormatBuilder;
 
         public FilesController(
             IFileFacade fileFacade,
@@ -43,6 +45,7 @@ namespace MathSite.Api.Server.Controllers
         {
             _fileFacade = fileFacade;
             _crudServiceMethods = crudServiceMethods;
+            _fileFormatBuilder = new FileFormatBuilder();
         }
 
         [HttpPost(MethodNames.Global.Create)]
@@ -103,8 +106,8 @@ namespace MathSite.Api.Server.Controllers
             throw new NotImplementedException();
         }
 
-        [HttpPost("upload-file")]
-        [AuthorizeMethod(ServiceName, "upload-file")]
+        [HttpPost(MethodAccessNames.Files.PutFile)]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Files.PutFile)]
         [Authorize(Roles = "admin")]
         public Task<ApiResponse<Guid>> UploadFile(Guid directoryId)
         {
@@ -115,6 +118,18 @@ namespace MathSite.Api.Server.Controllers
             });
         }
 
+        [HttpGet(MethodAccessNames.Files.GetFileById)]
+        [AuthorizeMethod(ServiceName, MethodAccessNames.Files.GetFileById)]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            var (fileName, fileStream, extension) = await _fileFacade.GetFileAsync(id);
+
+            if (fileStream == null)
+                return NotFound();
+
+            var fileFormat = _fileFormatBuilder.GetFileFormatForExtension(extension);
+            return File(fileStream, fileFormat.ContentType, fileName);
+        }
         protected async Task<Entities.File> ViewModelToEntityAsync(FileDto viewModel, ActionType actionType)
         {
             Entities.File file;

@@ -39,6 +39,13 @@ namespace MathSite.Api.Server.Infrastructure
             _fileStorage = fileStorage;
             Mapper = mapper;
         }
+        public async Task<(string FileName, Stream FileStream, string Extension)> GetFileAsync(Guid id)
+        {
+            var file = await Repository.FirstOrDefaultAsync(f=>f.Id==id);
+            return file == null
+                ? (null, null, null)
+                : (file.Name, _fileStorage.GetFileStream(file.Path), file.Extension);
+        }
         public async Task<Guid> SaveFileAsync(string name, Stream data, Guid dirId)
         {
             // Removed for time it works

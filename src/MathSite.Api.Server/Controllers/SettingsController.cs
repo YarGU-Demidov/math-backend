@@ -174,14 +174,15 @@ namespace MathSite.Api.Server.Controllers
         }
         private async Task<bool> SetStringSettingAsync(Guid userId, string name, string value)
         {
-            var userDoesntExist = userId == Guid.Empty || await Context.Users.CountAsync(user => user.Id == userId) == 0;
-            if (userDoesntExist)
-            {
-                return false;
-            }
-            var hasRight = await Services.Users.HasRightAsync(userId, RightAliases.SetSiteSettingsAccess);
-            if (!hasRight)
-                return false;
+            // muted for better times
+            //var userDoesntExist = userId == Guid.Empty || await Context.Users.CountAsync(user => user.Id == userId) == 0;
+            //if (userDoesntExist)
+            //{
+            //    return false;
+            //}
+            //var hasRight = await Services.Users.HasRightAsync(userId, RightAliases.SetSiteSettingsAccess);
+            //if (!hasRight)
+            //    return false;
 
             var setting =
                 await Context.SiteSettings.FirstOrDefaultAsync(s => s.Key == name);
@@ -197,7 +198,7 @@ namespace MathSite.Api.Server.Controllers
                 setting.Value = valueBytes;
                 Context.SiteSettings.Update(setting);
             }
-
+            Context.SaveChanges();
             return true;
         }
     }
