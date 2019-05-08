@@ -24,6 +24,12 @@ namespace MathSite.Api.Server.Infrastructure
 
             CreateMap<Group, GroupDto>();
             CreateMap<GroupDto, Group>();
+
+            CreateMap<Directory, DirectoryDto>();
+            CreateMap<DirectoryDto, Directory>();
+
+            CreateMap<File, FileDto>();
+            CreateMap<FileDto, File>();
         }
     }
 }

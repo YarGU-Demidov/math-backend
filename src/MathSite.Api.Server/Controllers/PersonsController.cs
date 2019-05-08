@@ -15,7 +15,6 @@ using MathSite.Api.Server.Infrastructure.Attributes.VersionsAttributes;
 using MathSite.Api.Server.Infrastructure.CommonServiceMethods;
 using MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1;
 using MathSite.Api.Services.Infrastructure;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
