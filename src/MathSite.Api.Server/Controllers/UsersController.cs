@@ -53,7 +53,7 @@ namespace MathSite.Api.Server.Controllers
 
         [HttpGet(MethodNames.Global.GetOne)]
         [AuthorizeMethod(ServiceName, MethodAccessNames.Global.GetOne)]
-        public Task<ApiResponse<UserDto>> GetById(Guid id)
+        public Task<ApiResponse<UserDto>> GetById([FromQuery]Guid id)
         {
             return ExecuteSafely(() => _crudServiceMethods.GetById(id));
         }
@@ -192,7 +192,7 @@ namespace MathSite.Api.Server.Controllers
                 else if (isGuest)
                 {
                     Services.Groups.ShouldRaiseException = false;
-                    var guestsGroup = await Services.Groups.GetByAliasAsync(GroupAliases.Guest);
+                    var guestsGroup = Context.Groups.FirstOrDefault(g => g.Alias == GroupAliases.Guest);
 
                     if (guestsGroup.IsNull())
                         throw new MissingMemberException(ExceptionsDescriptions.GuestsGroupNotFound);

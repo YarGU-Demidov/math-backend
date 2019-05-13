@@ -64,7 +64,6 @@ namespace MathSite.Api.Server
         {
             if (env.IsDevelopment())
                 app.UseDevelopmentConfig();
-
             app.UseForwarding();
             app.UseAuthentication();
             app.UseMathRouting();

@@ -8,6 +8,7 @@ using MathSite.Api.Common.FileFormats;
 using MathSite.Api.Common.FileStorage;
 using MathSite.Api.Db;
 using MathSite.Api.Server.Authorization;
+using MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1;
 using MathSite.Api.Services.Infrastructure;
 using MathSite.Common.ApiServiceRequester.UriBuilders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -96,7 +97,10 @@ namespace MathSite.Api.Server.Infrastructure.Configuration
             services.Configure<ExtendedAuthData>(authSection);
 
             services.AddScoped<IPasswordsManager, DoubleSha512HashPasswordsManager>();
-            
+            services.AddScoped<IFileFacade, FileFacade>();
+            services.AddScoped<IFileStorage, LocalFileSystemStorage>();
+
+
             services.AddSingleton<IAuthorizationPolicyProvider, RightPolicyProvider>();
             services.AddSingleton<IAuthorizationHandler, RightsAuthorizationHandler>();
 
