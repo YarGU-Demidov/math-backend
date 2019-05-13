@@ -142,7 +142,7 @@ namespace MathSite.Api.Server.Controllers
                 var users = await Repository
                     .Include(u=> u.Person)
                     .Include(u=>u.Group)
-                    .Where(u=>u.Login == login)
+                    .Where(u=>u.Login.ToLower().Contains(login.ToLower()))
                     .Select(u => Mapper.Map<UserDto>(u))
                     .ToArrayAsync();
                 return (IEnumerable<UserDto>)users;

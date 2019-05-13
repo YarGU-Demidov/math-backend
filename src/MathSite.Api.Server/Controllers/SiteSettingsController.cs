@@ -108,18 +108,47 @@ namespace MathSite.Api.Server.Controllers
 
             return settingValue;
         }
+        [HttpPost("set-site-settings")]
+        [AuthorizeMethod(ServiceName, "set-site-settings")]
+        public Task<ApiResponse<bool>> SetSiteSettings([FromBody] SiteSettings settings)
+        {
+            return ExecuteSafely(async () => {
+                var result = await SetStringSettingAsync(SiteSettingsNames.DefaultHomePageTitle, settings.DefaultTitleForHomePage);
+                result = result ? await SetStringSettingAsync( SiteSettingsNames.DefaultNewsPageTitle, settings.DefaultTitleForNewsPage) : result;
+                result = result ? await SetStringSettingAsync(SiteSettingsNames.PerPage, settings.PerPageCount.ToString()) : result;
+                result = result ? await SetStringSettingAsync(SiteSettingsNames.SiteName, settings.SiteName) : result;
+                result = result ? await SetStringSettingAsync(SiteSettingsNames.TitleDelimiter, settings.TitleDelimiter) : result;
+                return result;
+            });
+        }
 
+        [HttpGet("get-site-settings")]
+        [AuthorizeMethod(ServiceName, "get-site-settings")]
+        public Task<ApiResponse<SiteSettings>> GetSiteSettings()
+        {
+            return ExecuteSafely(async () =>
+            {
+                var siteSettings = new SiteSettings();
+                siteSettings.SiteName = await GetStringSettingAsync(SiteSettingsNames.SiteName);
+                siteSettings.DefaultTitleForNewsPage = await GetStringSettingAsync(SiteSettingsNames.DefaultNewsPageTitle);
+                siteSettings.DefaultTitleForHomePage = await GetStringSettingAsync(SiteSettingsNames.DefaultHomePageTitle);
+                siteSettings.PerPageCount = int.Parse(await GetStringSettingAsync(SiteSettingsNames.PerPage));
+                siteSettings.TitleDelimiter = await GetStringSettingAsync(SiteSettingsNames.TitleDelimiter);
+                return siteSettings;
+            });
+        }
         private async Task<bool> SetStringSettingAsync(string name, string value)
         {
-            var currentUserId = await Services.Auth.GetCurrentUserIdAsync();
-            var isGuest = currentUserId == Guid.Empty || (await Services.Users.GetById(currentUserId)).IsNull();
+            // commented till requester fiexed.
+            //var currentUserId = await Services.Auth.GetCurrentUserIdAsync();
+            //var isGuest = currentUserId == Guid.Empty || (await Services.Users.GetById(currentUserId)).IsNull();
 
-            if (isGuest)
-                return false;
+            //if (isGuest)
+            //    return false;
 
-            var hasRight = await Services.Users.HasRightAsync(currentUserId, RightAliases.SetSiteSettingsAccess);
-            if (!hasRight)
-                return false;
+            //var hasRight = await Services.Users.HasRightAsync(currentUserId, RightAliases.SetSiteSettingsAccess);
+            //if (!hasRight)
+            //    return false;
 
             var setting =
                 await Repository.FirstOrDefaultAsync(s=>s.Key == name);

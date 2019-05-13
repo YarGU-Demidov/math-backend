@@ -20,5 +20,6 @@ namespace MathSite.Api.Server.Infrastructure.ServicesInterfaces.V1
         Task<ApiResponse<bool>> SetDefaultNewsPageTitle(string title);
         Task<ApiResponse<bool>> SetSiteName(string siteName);
         Task<ApiResponse<SiteSettings>> GetSiteSettings();
+        Task<ApiResponse<bool>> SetSiteSettings(SiteSettings settings);
     }
 }
