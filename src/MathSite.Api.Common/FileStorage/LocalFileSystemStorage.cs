@@ -12,7 +12,7 @@ namespace MathSite.Api.Common.FileStorage
 
         public LocalFileSystemStorage(IHostingEnvironment hostingEnvironment)
         {
-            _webRootPath = _webRootPath ?? hostingEnvironment.WebRootPath;
+            _webRootPath = _webRootPath ?? hostingEnvironment.ContentRootPath;
 
             if (!Directory.Exists(SavePath))
                 Directory.CreateDirectory(SavePath);
