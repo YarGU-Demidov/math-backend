@@ -128,11 +128,12 @@ namespace MathSite.Api.Server.Controllers
         {
             return ExecuteSafely(async () =>
             {
+                var defaultPerPageCount = "18";
                 var siteSettings = new SiteSettings();
                 siteSettings.SiteName = await GetStringSettingAsync(SiteSettingsNames.SiteName);
                 siteSettings.DefaultTitleForNewsPage = await GetStringSettingAsync(SiteSettingsNames.DefaultNewsPageTitle);
                 siteSettings.DefaultTitleForHomePage = await GetStringSettingAsync(SiteSettingsNames.DefaultHomePageTitle);
-                siteSettings.PerPageCount = int.Parse(await GetStringSettingAsync(SiteSettingsNames.PerPage));
+                siteSettings.PerPageCount = int.Parse(await GetStringSettingAsync(SiteSettingsNames.PerPage) ?? defaultPerPageCount);
                 siteSettings.TitleDelimiter = await GetStringSettingAsync(SiteSettingsNames.TitleDelimiter);
                 return siteSettings;
             });
